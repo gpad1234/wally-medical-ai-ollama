@@ -1,25 +1,21 @@
-# GitHub Pages Configuration for WALLY-CLEAN Project
-title: WALLY Ontology Editor
-description: Interactive Fish-Eye Graph Visualization for Large-Scale Ontologies
-baseurl: "/Startup-One-Wally-Clean"
+# GitHub Pages Configuration — WALLY Medical AI Reasoner
+title: WALLY — Medical AI Reasoner
+description: Symptom-based diagnostic reasoning powered by a local ontology knowledge graph + Ollama LLM
+baseurl: "/wally-medical-ai-ollama"
 url: "https://gpad1234.github.io"
 
 # Theme
 theme: jekyll-theme-cayman
-# Alternative themes: minima, jekyll-theme-slate, jekyll-theme-architect
 
 # Navigation
 header_pages:
-  - index.html
-  - features.html
-  - getting-started.html
-  - development.html
-  - deployment.html
-  - architecture.html
+  - index.md
+  - getting-started.md
+  - api.md
 
 # Social links
 github_username: gpad1234
-repository: gpad1234/Startup-One-Wally-Clean
+repository: gpad1234/wally-medical-ai-ollama
 
 # Build settings
 markdown: kramdown
@@ -27,20 +23,15 @@ kramdown:
   input: GFM
   hard_wrap: false
 
-# Include/Exclude
-include:
-  - guides
-  - architecture
-  - api
-  - tutorials
-
 exclude:
   - Gemfile
   - Gemfile.lock
   - node_modules
   - vendor
+  - archive/
+  - guides/
+  - architecture/
 
-# Plugins
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
