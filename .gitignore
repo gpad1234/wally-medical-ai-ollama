@@ -1,0 +1,246 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+*.dylib
+*.dll
+
+# Distribution / packaging
+.Python
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.env.*
+.venv
+venv
+ENV
+env
+env.bak
+venv.bak
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# C/C++ build artifacts
+*.o
+*.obj
+*.a
+*.lib
+*.exe
+*.out
+*.app
+*.i
+*.ii
+*.lst
+*.sym
+*.map
+*.mod
+*.cmd
+*.d
+*.gcno
+*.gcda
+*.gcov
+*.pdb
+*.idb
+*.suo
+*.user
+*.sdf
+*.ipch
+*.aps
+*.ncb
+*.opendb
+*.tlog
+*.log
+*.vspscc
+*.vssscc
+*.dbmdl
+*.psess
+*.vsp
+*.vspx
+*.vsix
+*.cachefile
+*.db
+*.sbr
+*.bsc
+*.scc
+*.ilk
+*.exp
+*.pdb
+*.lib
+*.dll
+*.dylib
+*.so
+*.a
+*.la
+*.lo
+*.def
+*.exp
+*.pyd
+bin/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Vite/React build
+graph-ui/dist/
+graph-ui/node_modules/
+
+# Mac system files
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db/.venv/
+# Build artifacts
+bin/
+obj/
+src/core/build/
+
+# Angular project (initialize on target machine)
+angular-graph-ui/
+
+# Object files
+*.o
+*.obj
+
+# Debug symbols
+*.dSYM/
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Compiled dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled static libraries
+*.a
+*.lib
+
+# Core dumps
+core
+core.*
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Generated graph files
+website_graph.json
+workflow_graph.json
+my_graph.json
+my_graph.txt
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Flask
+instance/
+.webassets-cache
+graph_web_ui.log

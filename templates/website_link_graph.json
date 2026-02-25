@@ -1,0 +1,29 @@
+{
+  "nodes": [
+    {"id": "Home", "type": "page", "url": "/"},
+    {"id": "About", "type": "page", "url": "/about"},
+    {"id": "Products", "type": "page", "url": "/products"},
+    {"id": "ProductA", "type": "page", "url": "/products/a"},
+    {"id": "ProductB", "type": "page", "url": "/products/b"},
+    {"id": "Blog", "type": "page", "url": "/blog"},
+    {"id": "Post1", "type": "page", "url": "/blog/post1"},
+    {"id": "Post2", "type": "page", "url": "/blog/post2"},
+    {"id": "Contact", "type": "page", "url": "/contact"}
+  ],
+  "edges": [
+    {"from": "Home", "to": "About"},
+    {"from": "Home", "to": "Products"},
+    {"from": "Home", "to": "Blog"},
+    {"from": "Home", "to": "Contact"},
+    {"from": "Products", "to": "ProductA"},
+    {"from": "Products", "to": "ProductB"},
+    {"from": "ProductA", "to": "Contact"},
+    {"from": "ProductB", "to": "Contact"},
+    {"from": "Blog", "to": "Post1"},
+    {"from": "Blog", "to": "Post2"},
+    {"from": "Post1", "to": "ProductA"},
+    {"from": "Post2", "to": "ProductB"},
+    {"from": "About", "to": "Contact"},
+    {"from": "Contact", "to": "Home"}
+  ]
+}

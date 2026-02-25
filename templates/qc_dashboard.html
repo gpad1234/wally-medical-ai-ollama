@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quality Control Dashboard - WALLY-CLEAN</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0f1419;
+            color: #c9d1d9;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e2a3a 0%, #2d3748 100%);
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            border-bottom: 2px solid #30363d;
+        }
+        
+        .header h1 {
+            color: #58a6ff;
+            font-size: 2rem;
+            font-weight: 600;
+        }
+        
+        .header p {
+            color: #8b949e;
+            margin-top: 0.25rem;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .controls {
+            background: #161b22;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            border: 1px solid #30363d;
+        }
+        
+        .controls h2 {
+            color: #f0f6fc;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: #238636;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2ea043;
+        }
+        
+        .btn-secondary {
+            background: #21262d;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+        }
+        
+        .btn-secondary:hover {
+            background: #30363d;
+        }
+        
+        .btn-danger {
+            background: #da3633;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #e5534b;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: #161b22;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+            transition: transform 0.2s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: #58a6ff;
+        }
+        
+        .stat-card h3 {
+            color: #8b949e;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #f0f6fc;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #8b949e;
+            font-size: 0.9rem;
+        }
+        
+        .stat-success {
+            color: #3fb950;
+        }
+        
+        .stat-danger {
+            color: #f85149;
+        }
+        
+        .stat-warning {
+            color: #d29922;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background: #21262d;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.75rem;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3fb950, #58a6ff);
+            transition: width 0.5s ease;
+        }
+        
+        .section {
+            background: #161b22;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            border: 1px solid #30363d;
+        }
+        
+        .section h2 {
+            color: #f0f6fc;
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 0.75rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background: #21262d;
+            padding: 0.75rem;
+            text-align: left;
+            color: #f0f6fc;
+            font-weight: 600;
+            border-bottom: 2px solid #30363d;
+        }
+        
+        td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #21262d;
+        }
+        
+        tr:hover {
+            background: #21262d;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+        
+        .status-passed {
+            background: rgba(63, 185, 80, 0.2);
+            color: #3fb950;
+        }
+        
+        .status-failed {
+            background: rgba(248, 81, 73, 0.2);
+            color: #f85149;
+        }
+        
+        .status-skipped {
+            background: rgba(139, 148, 158, 0.2);
+            color: #8b949e;
+        }
+        
+        .status-running {
+            background: rgba(88, 166, 255, 0.2);
+            color: #58a6ff;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .layer-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: #21262d;
+            color: #8b949e;
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            color: #8b949e;
+        }
+        
+        .spinner {
+            border: 3px solid #21262d;
+            border-top: 3px solid #58a6ff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-right: 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #8b949e;
+        }
+        
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .chart-container {
+            height: 300px;
+            margin-top: 1rem;
+        }
+        
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+        }
+        
+        .alert-info {
+            background: rgba(88, 166, 255, 0.1);
+            border-color: #58a6ff;
+            color: #79c0ff;
+        }
+        
+        .alert-success {
+            background: rgba(63, 185, 80, 0.1);
+            border-color: #3fb950;
+            color: #56d364;
+        }
+        
+        .alert-danger {
+            background: rgba(248, 81, 73, 0.1);
+            border-color: #f85149;
+            color: #ff7b72;
+        }
+        
+        .test-detail {
+            background: #0d1117;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+        
+        .clickable {
+            cursor: pointer;
+        }
+        
+        .clickable:hover {
+            color: #58a6ff;
+        }
+        
+        select {
+            background: #21262d;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+        
+        .refresh-indicator {
+            display: inline-block;
+            margin-left: 1rem;
+            color: #8b949e;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🧪 Quality Control Dashboard</h1>
+        <p>Automated Testing & Quality Metrics for WALLY-CLEAN</p>
+    </div>
+
+    <div class="container">
+        <!-- Test Execution Controls -->
+        <div class="controls">
+            <h2>Test Execution</h2>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="runTests('core')">
+                    🔬 Test Core Layer
+                </button>
+                <button class="btn btn-primary" onclick="runTests('adapter')">
+                    🔌 Test Adapter Layer
+                </button>
+                <button class="btn btn-primary" onclick="runTests('service')">
+                    ⚙️ Test Service Layer
+                </button>
+                <button class="btn btn-primary" onclick="runTests('api')">
+                    🌐 Test API Layer
+                </button>
+                <button class="btn btn-secondary" onclick="runTests('all')">
+                    🚀 Run All Tests
+                </button>
+                <button class="btn btn-secondary" onclick="refreshDashboard()">
+                    🔄 Refresh
+                </button>
+            </div>
+            <div id="test-status" class="alert alert-info" style="display:none;">
+                Running tests...
+            </div>
+        </div>
+
+        <!-- Overall Statistics -->
+        <div class="stats-grid" id="stats-grid">
+            <div class="stat-card">
+                <h3>Total Tests</h3>
+                <div class="stat-value" id="stat-total">-</div>
+                <div class="stat-label">Last execution</div>
+            </div>
+            <div class="stat-card">
+                <h3>Passed</h3>
+                <div class="stat-value stat-success" id="stat-passed">-</div>
+                <div class="stat-label">Successful tests</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-passed" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <h3>Failed</h3>
+                <div class="stat-value stat-danger" id="stat-failed">-</div>
+                <div class="stat-label">Failed tests</div>
+            </div>
+            <div class="stat-card">
+                <h3>Success Rate</h3>
+                <div class="stat-value" id="stat-rate">-</div>
+                <div class="stat-label">Pass percentage</div>
+            </div>
+        </div>
+
+        <!-- Layer Status -->
+        <div class="section">
+            <h2>Layer Status</h2>
+            <div id="layer-status">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <span>Loading layer information...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test History -->
+        <div class="section">
+            <h2>Test History 
+                <select id="layer-filter" onchange="filterHistory()" style="float: right;">
+                    <option value="">All Layers</option>
+                    <option value="core">Core</option>
+                    <option value="adapter">Adapter</option>
+                    <option value="service">Service</option>
+                    <option value="api">API</option>
+                </select>
+            </h2>
+            <div id="test-history">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <span>Loading test history...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Failing Tests -->
+        <div class="section">
+            <h2>Currently Failing Tests</h2>
+            <div id="failing-tests">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <span>Loading failing tests...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5001/api/qc';
+        let currentFilter = '';
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDashboard();
+            
+            // Auto-refresh every 30 seconds
+            setInterval(loadDashboard, 30000);
+        });
+
+        async function loadDashboard() {
+            await Promise.all([
+                loadStatus(),
+                loadLayerStatus(),
+                loadHistory(),
+                loadFailingTests()
+            ]);
+        }
+
+        async function loadStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/status`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateStats(data.data);
+                }
+            } catch (error) {
+                console.error('Error loading status:', error);
+            }
+        }
+
+        async function loadLayerStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/latest-by-layer`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    renderLayerStatus(data.data);
+                }
+            } catch (error) {
+                console.error('Error loading layer status:', error);
+                document.getElementById('layer-status').innerHTML = 
+                    '<div class="empty-state">Error loading layer status</div>';
+            }
+        }
+
+        async function loadHistory() {
+            try {
+                const layer = currentFilter || '';
+                const response = await fetch(`${API_BASE}/history?limit=20&layer=${layer}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    renderHistory(data.data);
+                }
+            } catch (error) {
+                console.error('Error loading history:', error);
+                document.getElementById('test-history').innerHTML = 
+                    '<div class="empty-state">Error loading test history</div>';
+            }
+        }
+
+        async function loadFailingTests() {
+            try {
+                const response = await fetch(`${API_BASE}/failing-tests?limit=20`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    renderFailingTests(data.data);
+                }
+            } catch (error) {
+                console.error('Error loading failing tests:', error);
+                document.getElementById('failing-tests').innerHTML = 
+                    '<div class="empty-state">Error loading failing tests</div>';
+            }
+        }
+
+        function updateStats(stats) {
+            // Get latest run from layer stats
+            let latestRun = null;
+            if (stats.layers) {
+                for (const layer in stats.layers) {
+                    const layerStats = stats.layers[layer];
+                    if (!latestRun || layerStats.last_run > latestRun.last_run) {
+                        latestRun = layerStats;
+                    }
+                }
+            }
+
+            if (latestRun) {
+                document.getElementById('stat-total').textContent = latestRun.total || 0;
+                document.getElementById('stat-passed').textContent = latestRun.passed || 0;
+                document.getElementById('stat-failed').textContent = latestRun.failed || 0;
+                
+                const rate = latestRun.success_rate || 0;
+                document.getElementById('stat-rate').textContent = rate.toFixed(1) + '%';
+                document.getElementById('progress-passed').style.width = rate + '%';
+            }
+        }
+
+        function renderLayerStatus(layers) {
+            if (Object.keys(layers).length === 0) {
+                document.getElementById('layer-status').innerHTML = 
+                    '<div class="empty-state"><div class="empty-state-icon">📊</div><p>No test data available yet. Run tests to see layer status.</p></div>';
+                return;
+            }
+
+            let html = '<table><thead><tr><th>Layer</th><th>Total</th><th>Passed</th><th>Failed</th><th>Success Rate</th><th>Last Run</th><th>Actions</th></tr></thead><tbody>';
+            
+            for (const [layer, data] of Object.entries(layers)) {
+                const successRate = data.success_rate.toFixed(1);
+                const statusClass = data.failed > 0 ? 'stat-danger' : 'stat-success';
+                const lastRun = new Date(data.timestamp).toLocaleString();
+                
+                html += `
+                    <tr>
+                        <td><span class="layer-badge">${layer.toUpperCase()}</span></td>
+                        <td>${data.total}</td>
+                        <td class="stat-success">${data.passed}</td>
+                        <td class="stat-danger">${data.failed}</td>
+                        <td class="${statusClass}">${successRate}%</td>
+                        <td>${lastRun}</td>
+                        <td>
+                            <button class="btn btn-secondary" onclick="viewRunDetails('${data.run_id}')" style="padding: 0.25rem 0.75rem; font-size: 0.85rem;">
+                                View Details
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }
+            
+            html += '</tbody></table>';
+            document.getElementById('layer-status').innerHTML = html;
+        }
+
+        function renderHistory(history) {
+            if (history.length === 0) {
+                document.getElementById('test-history').innerHTML = 
+                    '<div class="empty-state"><div class="empty-state-icon">📝</div><p>No test history available.</p></div>';
+                return;
+            }
+
+            let html = '<table><thead><tr><th>Run ID</th><th>Layer</th><th>Total</th><th>Passed</th><th>Failed</th><th>Success Rate</th><th>Duration</th><th>Timestamp</th></tr></thead><tbody>';
+            
+            for (const run of history) {
+                const timestamp = new Date(run.timestamp).toLocaleString();
+                const statusClass = run.failed > 0 ? 'stat-danger' : 'stat-success';
+                
+                html += `
+                    <tr class="clickable" onclick="viewRunDetails('${run.run_id}')">
+                        <td><code>${run.run_id.substring(0, 20)}...</code></td>
+                        <td><span class="layer-badge">${(run.layer || 'all').toUpperCase()}</span></td>
+                        <td>${run.total}</td>
+                        <td class="stat-success">${run.passed}</td>
+                        <td class="stat-danger">${run.failed}</td>
+                        <td class="${statusClass}">${run.success_rate.toFixed(1)}%</td>
+                        <td>${run.duration.toFixed(2)}s</td>
+                        <td>${timestamp}</td>
+                    </tr>
+                `;
+            }
+            
+            html += '</tbody></table>';
+            document.getElementById('test-history').innerHTML = html;
+        }
+
+        function renderFailingTests(tests) {
+            if (tests.length === 0) {
+                document.getElementById('failing-tests').innerHTML = 
+                    '<div class="alert alert-success">✅ All tests passing!</div>';
+                return;
+            }
+
+            let html = '<div class="alert alert-danger">⚠️ ' + tests.length + ' test(s) currently failing</div>';
+            html += '<table><thead><tr><th>Test Name</th><th>Layer</th><th>Error</th><th>Timestamp</th></tr></thead><tbody>';
+            
+            for (const test of tests) {
+                const timestamp = new Date(test.timestamp).toLocaleString();
+                const errorPreview = test.error ? test.error.substring(0, 100) + '...' : 'No error message';
+                
+                html += `
+                    <tr>
+                        <td><code>${test.name}</code></td>
+                        <td><span class="layer-badge">${(test.layer || 'unknown').toUpperCase()}</span></td>
+                        <td style="font-size: 0.85rem; color: #f85149;">${errorPreview}</td>
+                        <td>${timestamp}</td>
+                    </tr>
+                `;
+            }
+            
+            html += '</tbody></table>';
+            document.getElementById('failing-tests').innerHTML = html;
+        }
+
+        async function runTests(layer) {
+            const statusDiv = document.getElementById('test-status');
+            statusDiv.style.display = 'block';
+            statusDiv.className = 'alert alert-info';
+            statusDiv.innerHTML = `<span class="status-running">⏳ Running ${layer} tests...</span>`;
+            
+            // Disable all test buttons
+            const buttons = document.querySelectorAll('.btn-primary');
+            buttons.forEach(btn => btn.disabled = true);
+            
+            try {
+                const response = await fetch(`${API_BASE}/run-tests`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        layer: layer,
+                        verbose: true
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    statusDiv.className = 'alert alert-success';
+                    statusDiv.innerHTML = `✅ Tests completed! ${data.data.passed}/${data.data.total} passed (${data.data.success_rate.toFixed(1)}%)`;
+                    
+                    // Reload dashboard after tests complete
+                    setTimeout(loadDashboard, 1000);
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                statusDiv.className = 'alert alert-danger';
+                statusDiv.innerHTML = `❌ Error running tests: ${error.message}`;
+            } finally {
+                buttons.forEach(btn => btn.disabled = false);
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        async function viewRunDetails(runId) {
+            try {
+                const response = await fetch(`${API_BASE}/run/${runId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Open details in a new window or modal
+                    alert(`Run Details:\n\nRun ID: ${data.data.run_id}\nTotal: ${data.data.total}\nPassed: ${data.data.passed}\nFailed: ${data.data.failed}\nSuccess Rate: ${data.data.success_rate.toFixed(1)}%\nDuration: ${data.data.duration.toFixed(2)}s`);
+                }
+            } catch (error) {
+                alert('Error loading run details: ' + error.message);
+            }
+        }
+
+        function filterHistory() {
+            currentFilter = document.getElementById('layer-filter').value;
+            loadHistory();
+        }
+
+        function refreshDashboard() {
+            loadDashboard();
+        }
+    </script>
+</body>
+</html>

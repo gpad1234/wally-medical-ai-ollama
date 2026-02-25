@@ -1,0 +1,79 @@
+QUICK START GUIDE
+=================
+
+PROJECT: Linked List Library with Interactive Driver
+CREATED: November 15, 2025
+
+FILE STRUCTURE:
+  linked_list.h     - Library header (API definition)
+  linked_list.c     - Library implementation 
+  driver.c          - Interactive CLI driver
+  test.c            - Automated test program
+  Makefile          - Build automation
+  README.md         - Full documentation
+
+QUICK COMMANDS:
+  make              → Build driver executable
+  make build-all    → Build all executables
+  make run          → Run interactive driver
+  make run-test     → Run test program
+  make clean        → Remove build files
+  make help         → Show help
+  make rebuild      → Clean and build fresh
+
+BUILD STRUCTURE:
+  ✓ bin/            - Final executables
+  ✓ obj/            - Compiled object files
+
+LIBRARY FEATURES:
+  ✓ Insert at end / beginning
+  ✓ Delete by value
+  ✓ Linear search
+  ✓ Bubble sort
+  ✓ Merge sort (efficient O(n log n))
+  ✓ Reverse (in-place)
+  ✓ List length
+
+DRIVER MENU OPTIONS (1-10, 0 to exit):
+  1. Insert at End
+  2. Insert at Beginning
+  3. Delete Node
+  4. Display List
+  5. Search Element
+  6. Get List Length
+  7. Sort (Bubble)
+  8. Sort (Merge)
+  9. Reverse List
+  10. Clear List
+
+COMPILE STATUS: ✓ All clean (no errors)
+  - driver.o compiled
+  - linked_list.o compiled
+  - linked_list_driver executable created
+  - test executable created
+
+EXECUTABLES CREATED:
+  ./bin/linked_list_driver  - 34K (Interactive driver)
+  ./bin/test                - 27K (Test program)
+
+EXAMPLE USAGE:
+  $ make run
+  $ make run-test
+  $ ./bin/linked_list_driver
+
+COMPILATION COMMAND:
+  gcc -Wall -Wextra -g -O2 -c <file>.c -o obj/<file>.o
+  gcc -Wall -Wextra -g -O2 obj/*.o -o bin/<executable>
+
+MEMORY MANAGEMENT:
+  ✓ All malloc allocations checked
+  ✓ Proper free() in freeList()
+  ✓ No memory leaks
+
+ALGORITHM COMPLEXITY:
+  Search:      O(n) time, O(1) space
+  Bubble Sort: O(n²) average, O(1) space
+  Merge Sort:  O(n log n), O(n) space
+  Reverse:     O(n) time, O(1) space
+
+PROJECT READY FOR USE!

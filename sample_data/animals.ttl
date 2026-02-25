@@ -1,0 +1,102 @@
+@prefix : <http://example.org/animals#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://example.org/animals> a owl:Ontology ;
+    rdfs:label "Animal Kingdom Ontology" ;
+    rdfs:comment "A simple ontology about animals and their characteristics" .
+
+# Classes
+
+:Animal a owl:Class ;
+    rdfs:label "Animal" ;
+    rdfs:comment "A living organism that feeds on organic matter" .
+
+:Mammal a owl:Class ;
+    rdfs:label "Mammal" ;
+    rdfs:comment "Warm-blooded vertebrate animal" ;
+    rdfs:subClassOf :Animal .
+
+:Bird a owl:Class ;
+    rdfs:label "Bird" ;
+    rdfs:comment "Feathered, winged, egg-laying vertebrate" ;
+    rdfs:subClassOf :Animal .
+
+:Reptile a owl:Class ;
+    rdfs:label "Reptile" ;
+    rdfs:comment "Cold-blooded vertebrate" ;
+    rdfs:subClassOf :Animal .
+
+:Fish a owl:Class ;
+    rdfs:label "Fish" ;
+    rdfs:comment "Aquatic vertebrate with gills" ;
+    rdfs:subClassOf :Animal .
+
+:Dog a owl:Class ;
+    rdfs:label "Dog" ;
+    rdfs:comment "Domesticated carnivorous mammal" ;
+    rdfs:subClassOf :Mammal .
+
+:Cat a owl:Class ;
+    rdfs:label "Cat" ;
+    rdfs:comment "Small carnivorous mammal" ;
+    rdfs:subClassOf :Mammal .
+
+:Habitat a owl:Class ;
+    rdfs:label "Habitat" ;
+    rdfs:comment "The natural home or environment of an animal" .
+
+# Data Properties
+
+:commonName a owl:DatatypeProperty ;
+    rdfs:label "common name" ;
+    rdfs:comment "The common name of the animal" ;
+    rdfs:domain :Animal ;
+    rdfs:range xsd:string .
+
+:scientificName a owl:DatatypeProperty ;
+    rdfs:label "scientific name" ;
+    rdfs:comment "The scientific (Latin) name of the animal" ;
+    rdfs:domain :Animal ;
+    rdfs:range xsd:string .
+
+:averageLifespan a owl:DatatypeProperty ;
+    rdfs:label "average lifespan" ;
+    rdfs:comment "Average lifespan in years" ;
+    rdfs:domain :Animal ;
+    rdfs:range xsd:integer .
+
+:canFly a owl:DatatypeProperty ;
+    rdfs:label "can fly" ;
+    rdfs:comment "Whether the animal can fly" ;
+    rdfs:domain :Animal ;
+    rdfs:range xsd:boolean .
+
+:numberOfLegs a owl:DatatypeProperty ;
+    rdfs:label "number of legs" ;
+    rdfs:comment "Number of legs the animal has" ;
+    rdfs:domain :Animal ;
+    rdfs:range xsd:integer .
+
+# Object Properties
+
+:livesIn a owl:ObjectProperty ;
+    rdfs:label "lives in" ;
+    rdfs:comment "The habitat where the animal lives" ;
+    rdfs:domain :Animal ;
+    rdfs:range :Habitat .
+
+:preyOf a owl:ObjectProperty ;
+    rdfs:label "prey of" ;
+    rdfs:comment "This animal is prey of another animal" ;
+    rdfs:domain :Animal ;
+    rdfs:range :Animal .
+
+:feeds a owl:ObjectProperty ;
+    rdfs:label "feeds on" ;
+    rdfs:comment "This animal feeds on another animal" ;
+    rdfs:domain :Animal ;
+    rdfs:range :Animal .

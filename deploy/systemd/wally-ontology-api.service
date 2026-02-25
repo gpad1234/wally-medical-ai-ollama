@@ -1,0 +1,23 @@
+[Unit]
+Description=WALLY Ontology API Service
+After=network.target
+
+[Service]
+Type=simple
+User=wally
+Group=wally
+WorkingDirectory=/opt/wally-clean
+Environment="PYTHONPATH=/opt/wally-clean"
+Environment="FLASK_ENV=production"
+ExecStart=/opt/wally-clean/.venv/bin/python3 /opt/wally-clean/ontology_api.py
+Restart=always
+RestartSec=10
+StandardOutput=append:/opt/wally-clean/logs/ontology_api.log
+StandardError=append:/opt/wally-clean/logs/ontology_api_error.log
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

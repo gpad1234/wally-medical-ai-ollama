@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Database Web UI</title>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 0;
+            min-height: calc(100vh - 300px);
+        }
+
+        .sidebar {
+            background: #f8f9fa;
+            padding: 20px;
+            border-right: 1px solid #dee2e6;
+            overflow-y: auto;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #495057;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 6px;
+            background: #667eea;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .visualization {
+            padding: 20px;
+        }
+
+        #network {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        .results {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .results h4 {
+            margin-bottom: 15px;
+            color: #495057;
+        }
+
+        .result-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-item pre {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .path-item {
+            background: white;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .path-route {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            flex: 1;
+        }
+
+        .path-cost {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .alert {
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .node-info {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .node-info h5 {
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .node-info .property {
+            display: flex;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+
+        .node-info .property-key {
+            font-weight: bold;
+            margin-right: 8px;
+            color: #495057;
+        }
+
+        .node-info .property-value {
+            color: #6c757d;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #dee2e6;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 14px;
+            font-weight: 500;
+            color: #6c757d;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            color: #667eea;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+            margin-bottom: -2px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .highlight {
+            background: yellow;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 Graph Database Web UI</h1>
+            <p>Interactive query interface with visualization and traversal algorithms</p>
+        </header>
+
+        <div class="stats" id="stats">
+            <div class="stat">
+                <div class="stat-value" id="nodeCount">-</div>
+                <div class="stat-label">Nodes</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="edgeCount">-</div>
+                <div class="stat-label">Edges</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="graphType">-</div>
+                <div class="stat-label">Type</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="weightedType">-</div>
+                <div class="stat-label">Weights</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('query')">Query</button>
+                    <button class="tab" onclick="switchTab('actions')">Actions</button>
+                </div>
+
+                <!-- Query Tab -->
+                <div id="queryTab" class="tab-content active">
+                    <div class="section">
+                        <h3>📍 Node Details</h3>
+                        <div class="input-group">
+                            <label>Node ID</label>
+                            <input type="text" id="nodeId" placeholder="Enter node ID">
+                        </div>
+                        <button class="btn" onclick="getNodeDetails()">Get Node Info</button>
+                        <button class="btn btn-secondary" onclick="getNeighbors()">Show Neighbors</button>
+                    </div>
+
+                    <div class="section">
+                        <h3>🔎 Search Nodes</h3>
+                        <div class="input-group">
+                            <label>Property Key</label>
+                            <input type="text" id="searchKey" placeholder="e.g., role, team">
+                        </div>
+                        <div class="input-group">
+                            <label>Property Value</label>
+                            <input type="text" id="searchValue" placeholder="e.g., Developer">
+                        </div>
+                        <button class="btn" onclick="searchNodes()">Search</button>
+                    </div>
+
+                    <div class="section">
+                        <h3>🧭 Traversal Algorithms</h3>
+                        <div class="input-group">
+                            <label>Algorithm</label>
+                            <select id="algorithm">
+                                <option value="bfs">BFS (Breadth-First)</option>
+                                <option value="dfs">DFS (Depth-First)</option>
+                                <option value="shortest">Shortest Path</option>
+                                <option value="all">All Paths</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Start Node</label>
+                            <input type="text" id="startNode" placeholder="e.g., Alice">
+                        </div>
+                        <div class="input-group">
+                            <label>Target Node</label>
+                            <input type="text" id="targetNode" placeholder="e.g., Frank">
+                        </div>
+                        <button class="btn" onclick="runTraversal()">Run Traversal</button>
+                    </div>
+                </div>
+
+                <!-- Actions Tab -->
+                <div id="actionsTab" class="tab-content">
+                    <div class="section">
+                        <h3>💾 Export Graph</h3>
+                        <button class="btn" onclick="exportJSON()">Export as JSON</button>
+                        <button class="btn btn-secondary" onclick="exportAdjacency()">Export Adjacency List</button>
+                    </div>
+
+                    <div class="section">
+                        <h3>📊 Display Options</h3>
+                        <button class="btn" onclick="showAllNodes()">List All Nodes</button>
+                        <button class="btn btn-secondary" onclick="showAllEdges()">List All Edges</button>
+                        <button class="btn btn-secondary" onclick="refreshVisualization()">Refresh Graph</button>
+                    </div>
+
+                    <div class="section">
+                        <h3>⚙️ Graph Management</h3>
+                        <button class="btn btn-danger" onclick="resetGraph()">Reset to Sample</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="visualization">
+                <h3 style="margin-bottom: 15px; color: #495057;">Graph Visualization</h3>
+                <div id="network"></div>
+                
+                <div id="results" class="results" style="display: none;">
+                    <h4 id="resultsTitle">Results</h4>
+                    <div id="resultsContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let network = null;
+        let nodes = null;
+        let edges = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStats();
+            initializeVisualization();
+        });
+
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/graph/stats');
+                const data = await response.json();
+                
+                document.getElementById('nodeCount').textContent = data.node_count;
+                document.getElementById('edgeCount').textContent = data.edge_count;
+                document.getElementById('graphType').textContent = data.directed ? 'Directed' : 'Undirected';
+                document.getElementById('weightedType').textContent = data.weighted ? 'Weighted' : 'Unweighted';
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function initializeVisualization() {
+            try {
+                const response = await fetch('/api/graph/visualization');
+                const data = await response.json();
+
+                const container = document.getElementById('network');
+                
+                nodes = new vis.DataSet(data.nodes);
+                edges = new vis.DataSet(data.edges);
+
+                const graphData = {
+                    nodes: nodes,
+                    edges: edges
+                };
+
+                const options = {
+                    nodes: {
+                        shape: 'dot',
+                        size: 20,
+                        font: {
+                            size: 14,
+                            color: '#333'
+                        },
+                        borderWidth: 2,
+                        color: {
+                            border: '#667eea',
+                            background: '#a3b3f7',
+                            highlight: {
+                                border: '#764ba2',
+                                background: '#667eea'
+                            }
+                        }
+                    },
+                    edges: {
+                        width: 2,
+                        color: {
+                            color: '#848484',
+                            highlight: '#667eea'
+                        },
+                        arrows: {
+                            to: {
+                                enabled: data.options.directed,
+                                scaleFactor: 0.5
+                            }
+                        },
+                        smooth: {
+                            type: 'continuous'
+                        },
+                        font: {
+                            size: 12,
+                            align: 'middle'
+                        }
+                    },
+                    physics: {
+                        stabilization: true,
+                        barnesHut: {
+                            gravitationalConstant: -2000,
+                            springConstant: 0.04,
+                            springLength: 150
+                        }
+                    },
+                    interaction: {
+                        hover: true,
+                        tooltipDelay: 100
+                    }
+                };
+
+                network = new vis.Network(container, graphData, options);
+
+                // Click event
+                network.on('click', function(params) {
+                    if (params.nodes.length > 0) {
+                        const nodeId = params.nodes[0];
+                        document.getElementById('nodeId').value = nodeId;
+                        getNodeDetails();
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error initializing visualization:', error);
+            }
+        }
+
+        async function getNodeDetails() {
+            const nodeId = document.getElementById('nodeId').value.trim();
+            if (!nodeId) {
+                showAlert('Please enter a node ID', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/graph/node/${nodeId}`);
+                if (!response.ok) {
+                    const error = await response.json();
+                    showAlert(error.error, 'error');
+                    return;
+                }
+
+                const data = await response.json();
+                
+                let html = `
+                    <div class="node-info">
+                        <h5>Node: ${data.node.id}</h5>
+                        ${Object.entries(data.node.data || {}).map(([key, value]) => `
+                            <div class="property">
+                                <span class="property-key">${key}:</span>
+                                <span class="property-value">${value}</span>
+                            </div>
+                        `).join('')}
+                        <div class="property">
+                            <span class="property-key">Degree:</span>
+                            <span class="property-value">${data.degree}</span>
+                        </div>
+                        <div class="property">
+                            <span class="property-key">Neighbors:</span>
+                            <span class="property-value">${data.neighbors.length > 0 ? data.neighbors.join(', ') : 'None'}</span>
+                        </div>
+                    </div>
+                `;
+
+                showResults('Node Details', html);
+                highlightNodes([nodeId]);
+
+            } catch (error) {
+                showAlert('Error fetching node details: ' + error.message, 'error');
+            }
+        }
+
+        async function getNeighbors() {
+            const nodeId = document.getElementById('nodeId').value.trim();
+            if (!nodeId) {
+                showAlert('Please enter a node ID', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/graph/neighbors/${nodeId}`);
+                if (!response.ok) {
+                    const error = await response.json();
+                    showAlert(error.error, 'error');
+                    return;
+                }
+
+                const data = await response.json();
+                
+                if (data.neighbors.length === 0) {
+                    showResults('Neighbors', '<p>No neighbors found.</p>');
+                    return;
+                }
+
+                let html = data.neighbors.map(neighbor => `
+                    <div class="node-info">
+                        <h5>${neighbor.id}</h5>
+                        ${Object.entries(neighbor.data || {}).map(([key, value]) => `
+                            <div class="property">
+                                <span class="property-key">${key}:</span>
+                                <span class="property-value">${value}</span>
+                            </div>
+                        `).join('')}
+                        ${neighbor.edge && neighbor.edge.weight ? `
+                            <div class="property">
+                                <span class="property-key">Edge Weight:</span>
+                                <span class="property-value">${neighbor.edge.weight}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+
+                showResults(`Neighbors of ${nodeId}`, html);
+                highlightNodes([nodeId, ...data.neighbors.map(n => n.id)]);
+
+            } catch (error) {
+                showAlert('Error fetching neighbors: ' + error.message, 'error');
+            }
+        }
+
+        async function searchNodes() {
+            const key = document.getElementById('searchKey').value.trim();
+            const value = document.getElementById('searchValue').value.trim();
+
+            if (!key) {
+                showAlert('Please enter a search key', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/graph/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key, value })
+                });
+
+                const data = await response.json();
+                
+                if (data.count === 0) {
+                    showResults('Search Results', '<p>No nodes found matching criteria.</p>');
+                    return;
+                }
+
+                let html = `<p>Found ${data.count} node(s):</p>`;
+                html += data.results.map(node => `
+                    <div class="node-info">
+                        <h5>${node.id}</h5>
+                        ${Object.entries(node.data || {}).map(([k, v]) => `
+                            <div class="property">
+                                <span class="property-key">${k}:</span>
+                                <span class="property-value ${k === key ? 'highlight' : ''}">${v}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `).join('');
+
+                showResults(`Search Results: ${key}=${value || '(any)'}`, html);
+                highlightNodes(data.results.map(n => n.id));
+
+            } catch (error) {
+                showAlert('Error searching nodes: ' + error.message, 'error');
+            }
+        }
+
+        async function runTraversal() {
+            const algorithm = document.getElementById('algorithm').value;
+            const start = document.getElementById('startNode').value.trim();
+            const target = document.getElementById('targetNode').value.trim();
+
+            if (!start) {
+                showAlert('Please enter a start node', 'error');
+                return;
+            }
+
+            let endpoint, method;
+            
+            switch(algorithm) {
+                case 'bfs':
+                    endpoint = '/api/graph/bfs';
+                    method = 'POST';
+                    break;
+                case 'dfs':
+                    endpoint = '/api/graph/dfs';
+                    method = 'POST';
+                    break;
+                case 'shortest':
+                    if (!target) {
+                        showAlert('Please enter a target node for shortest path', 'error');
+                        return;
+                    }
+                    endpoint = '/api/graph/shortest_path';
+                    method = 'POST';
+                    break;
+                case 'all':
+                    if (!target) {
+                        showAlert('Please enter a target node for all paths', 'error');
+                        return;
+                    }
+                    endpoint = '/api/graph/all_paths';
+                    method = 'POST';
+                    break;
+            }
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ start, target })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    showAlert(error.error, 'error');
+                    return;
+                }
+
+                const data = await response.json();
+                displayTraversalResults(data, algorithm);
+
+            } catch (error) {
+                showAlert('Error running traversal: ' + error.message, 'error');
+            }
+        }
+
+        function displayTraversalResults(data, algorithm) {
+            let html = '';
+            let highlightNodesList = [];
+
+            if (algorithm === 'all') {
+                html = `<p>Found ${data.path_count} path(s) from ${data.start} to ${data.target}:</p>`;
+                data.paths.forEach((pathInfo, index) => {
+                    html += `
+                        <div class="path-item">
+                            <div class="path-route">${pathInfo.path.join(' → ')}</div>
+                            <div class="path-cost">Cost: ${pathInfo.cost.toFixed(1)}</div>
+                        </div>
+                    `;
+                });
+                if (data.paths.length > 0) {
+                    highlightNodesList = data.paths[0].path;
+                }
+            } else if (algorithm === 'shortest') {
+                if (data.path) {
+                    html = `
+                        <p><strong>Algorithm:</strong> ${data.algorithm}</p>
+                        <p><strong>Path:</strong> ${data.path.join(' → ')}</p>
+                        <p><strong>Cost:</strong> ${data.cost.toFixed(1)}</p>
+                    `;
+                    highlightNodesList = data.path;
+                } else {
+                    html = '<p>No path found.</p>';
+                }
+            } else {
+                html = `
+                    <p><strong>Algorithm:</strong> ${data.algorithm}</p>
+                    <p><strong>Visited Order:</strong> ${data.visited.join(' → ')}</p>
+                `;
+                if (data.path) {
+                    html += `<p><strong>Path to Target:</strong> ${data.path.join(' → ')}</p>`;
+                    highlightNodesList = data.path;
+                } else {
+                    highlightNodesList = data.visited;
+                }
+                if (data.distances) {
+                    html += '<p><strong>Distances from start:</strong></p>';
+                    html += '<div class="node-info">';
+                    Object.entries(data.distances).forEach(([node, dist]) => {
+                        html += `
+                            <div class="property">
+                                <span class="property-key">${node}:</span>
+                                <span class="property-value">${dist}</span>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+            }
+
+            showResults(`Traversal Results: ${algorithm.toUpperCase()}`, html);
+            highlightNodes(highlightNodesList);
+        }
+
+        async function showAllNodes() {
+            try {
+                const response = await fetch('/api/graph/nodes');
+                const data = await response.json();
+
+                let html = `<p>Total nodes: ${data.nodes.length}</p>`;
+                html += data.nodes.map(node => `
+                    <div class="node-info">
+                        <h5>${node.id}</h5>
+                        ${Object.entries(node.data || {}).map(([key, value]) => `
+                            <div class="property">
+                                <span class="property-key">${key}:</span>
+                                <span class="property-value">${value}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `).join('');
+
+                showResults('All Nodes', html);
+
+            } catch (error) {
+                showAlert('Error fetching nodes: ' + error.message, 'error');
+            }
+        }
+
+        async function showAllEdges() {
+            try {
+                const response = await fetch('/api/graph/edges');
+                const data = await response.json();
+
+                let html = `<p>Total edges: ${data.edges.length}</p>`;
+                html += data.edges.map(edge => `
+                    <div class="result-item">
+                        <pre>${edge.from} → ${edge.to}${edge.weight ? ` (weight: ${edge.weight})` : ''}</pre>
+                    </div>
+                `).join('');
+
+                showResults('All Edges', html);
+
+            } catch (error) {
+                showAlert('Error fetching edges: ' + error.message, 'error');
+            }
+        }
+
+        async function exportJSON() {
+            try {
+                const response = await fetch('/api/graph/export/json');
+                const data = await response.json();
+
+                const blob = new Blob([data.data], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'graph.json';
+                a.click();
+
+                showAlert('Graph exported as JSON', 'success');
+
+            } catch (error) {
+                showAlert('Error exporting JSON: ' + error.message, 'error');
+            }
+        }
+
+        async function exportAdjacency() {
+            try {
+                const response = await fetch('/api/graph/export/adjacency');
+                const data = await response.json();
+
+                const blob = new Blob([data.data], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'graph_adjacency.txt';
+                a.click();
+
+                showAlert('Graph exported as adjacency list', 'success');
+
+            } catch (error) {
+                showAlert('Error exporting adjacency list: ' + error.message, 'error');
+            }
+        }
+
+        async function resetGraph() {
+            if (!confirm('Reset graph to sample data? This will clear current data.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/graph/reset', { method: 'POST' });
+                const data = await response.json();
+
+                showAlert(data.message, 'success');
+                loadStats();
+                initializeVisualization();
+
+            } catch (error) {
+                showAlert('Error resetting graph: ' + error.message, 'error');
+            }
+        }
+
+        function refreshVisualization() {
+            initializeVisualization();
+            loadStats();
+            showAlert('Visualization refreshed', 'success');
+        }
+
+        function showResults(title, content) {
+            document.getElementById('resultsTitle').textContent = title;
+            document.getElementById('resultsContent').innerHTML = content;
+            document.getElementById('results').style.display = 'block';
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.insertBefore(alertDiv, resultsDiv.firstChild);
+
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        function highlightNodes(nodeIds) {
+            if (!network) return;
+
+            // Reset all nodes
+            nodes.forEach(node => {
+                nodes.update({
+                    id: node.id,
+                    color: {
+                        border: '#667eea',
+                        background: '#a3b3f7'
+                    }
+                });
+            });
+
+            // Highlight selected nodes
+            nodeIds.forEach(nodeId => {
+                if (nodes.get(nodeId)) {
+                    nodes.update({
+                        id: nodeId,
+                        color: {
+                            border: '#764ba2',
+                            background: '#667eea'
+                        }
+                    });
+                }
+            });
+
+            // Focus on highlighted nodes
+            if (nodeIds.length > 0) {
+                network.fit({
+                    nodes: nodeIds,
+                    animation: true
+                });
+            }
+        }
+    </script>
+</body>
+</html>

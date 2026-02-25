@@ -1,0 +1,215 @@
+{
+  "name": "University Domain Ontology",
+  "description": "Sample ontology for university domain with classes, properties, and instances",
+  "version": "1.0",
+  "classes": [
+    {
+      "id": "Person",
+      "label": "Person",
+      "description": "A human being",
+      "parent_classes": ["owl:Thing"],
+      "is_abstract": false
+    },
+    {
+      "id": "Organization",
+      "label": "Organization",
+      "description": "An organized group of people",
+      "parent_classes": ["owl:Thing"],
+      "is_abstract": false
+    },
+    {
+      "id": "Student",
+      "label": "Student",
+      "description": "A person enrolled in courses",
+      "parent_classes": ["Person"],
+      "is_abstract": false
+    },
+    {
+      "id": "UndergraduateStudent",
+      "label": "Undergraduate Student",
+      "description": "A student pursuing undergraduate degree",
+      "parent_classes": ["Student"],
+      "is_abstract": false
+    },
+    {
+      "id": "GraduateStudent",
+      "label": "Graduate Student",
+      "description": "A student pursuing graduate degree",
+      "parent_classes": ["Student"],
+      "is_abstract": false
+    },
+    {
+      "id": "Professor",
+      "label": "Professor",
+      "description": "Faculty member who teaches courses",
+      "parent_classes": ["Person"],
+      "is_abstract": false
+    },
+    {
+      "id": "Course",
+      "label": "Course",
+      "description": "An educational course",
+      "parent_classes": ["owl:Thing"],
+      "is_abstract": false
+    },
+    {
+      "id": "Department",
+      "label": "Department",
+      "description": "Academic department",
+      "parent_classes": ["Organization"],
+      "is_abstract": false
+    }
+  ],
+  "properties": [
+    {
+      "id": "teaches",
+      "label": "teaches",
+      "description": "Professor teaches a course",
+      "property_type": "OBJECT",
+      "domain": ["Professor"],
+      "range": ["Course"],
+      "characteristics": []
+    },
+    {
+      "id": "enrolledIn",
+      "label": "enrolled in",
+      "description": "Student is enrolled in a course",
+      "property_type": "OBJECT",
+      "domain": ["Student"],
+      "range": ["Course"],
+      "characteristics": []
+    },
+    {
+      "id": "worksFor",
+      "label": "works for",
+      "description": "Person works for an organization",
+      "property_type": "OBJECT",
+      "domain": ["Person"],
+      "range": ["Organization"],
+      "characteristics": []
+    },
+    {
+      "id": "hasName",
+      "label": "has name",
+      "description": "Name of a thing",
+      "property_type": "DATA",
+      "domain": ["owl:Thing"],
+      "range": ["string"],
+      "characteristics": []
+    },
+    {
+      "id": "hasEmail",
+      "label": "has email",
+      "description": "Email address",
+      "property_type": "DATA",
+      "domain": ["Person"],
+      "range": ["string"],
+      "characteristics": []
+    },
+    {
+      "id": "hasGPA",
+      "label": "has GPA",
+      "description": "Grade point average",
+      "property_type": "DATA",
+      "domain": ["Student"],
+      "range": ["float"],
+      "characteristics": []
+    }
+  ],
+  "instances": [
+    {
+      "id": "cs_dept",
+      "label": "Computer Science Department",
+      "class_id": "Department",
+      "properties": {
+        "hasName": "Computer Science"
+      }
+    },
+    {
+      "id": "math_dept",
+      "label": "Mathematics Department",
+      "class_id": "Department",
+      "properties": {
+        "hasName": "Mathematics"
+      }
+    },
+    {
+      "id": "prof_alice",
+      "label": "Dr. Alice Smith",
+      "class_id": "Professor",
+      "properties": {
+        "hasName": "Alice Smith",
+        "hasEmail": "alice.smith@university.edu",
+        "worksFor": "cs_dept"
+      }
+    },
+    {
+      "id": "prof_bob",
+      "label": "Dr. Bob Jones",
+      "class_id": "Professor",
+      "properties": {
+        "hasName": "Bob Jones",
+        "hasEmail": "bob.jones@university.edu",
+        "worksFor": "math_dept"
+      }
+    },
+    {
+      "id": "student_john",
+      "label": "John Doe",
+      "class_id": "UndergraduateStudent",
+      "properties": {
+        "hasName": "John Doe",
+        "hasEmail": "john.doe@student.edu",
+        "hasGPA": "3.7"
+      }
+    },
+    {
+      "id": "student_jane",
+      "label": "Jane Smith",
+      "class_id": "GraduateStudent",
+      "properties": {
+        "hasName": "Jane Smith",
+        "hasEmail": "jane.smith@student.edu",
+        "hasGPA": "3.9"
+      }
+    },
+    {
+      "id": "course_cs101",
+      "label": "Intro to Computer Science",
+      "class_id": "Course",
+      "properties": {
+        "hasName": "CS101: Introduction to Computer Science"
+      }
+    },
+    {
+      "id": "course_cs201",
+      "label": "Data Structures",
+      "class_id": "Course",
+      "properties": {
+        "hasName": "CS201: Data Structures and Algorithms"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "from": "prof_alice",
+      "to": "course_cs101",
+      "property": "teaches"
+    },
+    {
+      "from": "prof_alice",
+      "to": "course_cs201",
+      "property": "teaches"
+    },
+    {
+      "from": "student_john",
+      "to": "course_cs101",
+      "property": "enrolledIn"
+    },
+    {
+      "from": "student_jane",
+      "to": "course_cs201",
+      "property": "enrolledIn"
+    }
+  ]
+}

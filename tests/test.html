@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        button { padding: 10px 20px; margin: 10px; font-size: 16px; }
+        pre { background: #f5f5f5; padding: 15px; border-radius: 5px; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Graph API Test</h1>
+    
+    <button onclick="testStats()">Test Stats API</button>
+    <button onclick="testTemplates()">Test Templates List</button>
+    <button onclick="loadTemplate()">Load 100-Node Template</button>
+    
+    <div id="result"></div>
+    
+    <script>
+        const API_URL = 'http://127.0.0.1:5001/api';
+        
+        async function testStats() {
+            try {
+                const response = await fetch(`${API_URL}/graph/stats`);
+                const data = await response.json();
+                document.getElementById('result').innerHTML = 
+                    `<h3 class="success">✓ Stats API Working</h3>
+                     <pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('result').innerHTML = 
+                    `<h3 class="error">✗ Error</h3><pre>${error.message}</pre>`;
+            }
+        }
+        
+        async function testTemplates() {
+            try {
+                const response = await fetch(`${API_URL}/templates/list`);
+                const data = await response.json();
+                document.getElementById('result').innerHTML = 
+                    `<h3 class="success">✓ Templates API Working</h3>
+                     <pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('result').innerHTML = 
+                    `<h3 class="error">✗ Error</h3><pre>${error.message}</pre>`;
+            }
+        }
+        
+        async function loadTemplate() {
+            try {
+                const response = await fetch(`${API_URL}/templates/load/social_network_100`);
+                const data = await response.json();
+                document.getElementById('result').innerHTML = 
+                    `<h3 class="success">✓ Template Loaded</h3>
+                     <pre>${JSON.stringify(data, null, 2)}</pre>
+                     <p>Now check stats to verify 98 nodes loaded!</p>`;
+            } catch (error) {
+                document.getElementById('result').innerHTML = 
+                    `<h3 class="error">✗ Error</h3><pre>${error.message}</pre>`;
+            }
+        }
+    </script>
+</body>
+</html>

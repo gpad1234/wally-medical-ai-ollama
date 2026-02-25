@@ -1,0 +1,318 @@
+.nlp-chat-log {
+  margin: 1.5rem 0 1.5rem 0;
+  min-height: 220px;
+  max-height: 420px;
+  overflow-y: auto;
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 1.2rem 1rem 1.2rem 1rem;
+  box-shadow: 0 2px 12px 0 rgba(25, 118, 210, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.nlp-chat-empty {
+  color: #b6c6e3;
+  text-align: center;
+  font-size: 1.1rem;
+  margin-top: 2rem;
+}
+.nlp-chat-bubble {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.7rem;
+  max-width: 80%;
+  animation: fadeInUp 0.5s cubic-bezier(.23,1.01,.32,1) both;
+}
+.nlp-chat-bubble.user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+.nlp-chat-bubble.bot {
+  align-self: flex-start;
+}
+.nlp-chat-avatar {
+  font-size: 2rem;
+  color: #1976d2;
+  background: #e3f2fd;
+  border-radius: 50%;
+  padding: 0.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.2rem;
+  min-height: 2.2rem;
+}
+.nlp-chat-content {
+  background: #fff;
+  border-radius: 16px;
+  padding: 0.8rem 1.1rem;
+  font-size: 1.08rem;
+  box-shadow: 0 2px 8px 0 rgba(25, 118, 210, 0.07);
+  color: #222;
+  min-width: 60px;
+  max-width: 420px;
+  word-break: break-word;
+  position: relative;
+  transition: background 0.2s;
+}
+.nlp-chat-bubble.user .nlp-chat-content {
+  background: #1976d2;
+  color: #fff;
+  box-shadow: 0 2px 8px 0 rgba(25, 118, 210, 0.13);
+}
+.nlp-chat-bubble.user .nlp-chat-avatar {
+  background: #1976d2;
+  color: #fff;
+}
+.nlp-chat-bubble.bot .nlp-chat-content {
+  background: #fff;
+  color: #222;
+}
+.nlp-chat-bubble.bot .nlp-chat-avatar {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+.nlp-tab {
+  padding: 1.5rem;
+  max-width: 800px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+.nlp-tab h2 {
+  margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  font-size: 2rem;
+  color: #1976d2;
+}
+.nlp-card {
+  background: #fff;
+  box-shadow: 0 2px 12px 0 rgba(25, 118, 210, 0.08);
+  border-radius: 10px;
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 1.2rem;
+  transition: box-shadow 0.2s;
+}
+.nlp-input-card {
+  margin-bottom: 1.5rem;
+}
+.nlp-form {
+  width: 100%;
+}
+.nlp-input-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  position: relative;
+}
+.nlp-input {
+  width: 100%;
+  min-height: 140px;
+  font-size: 1.15rem;
+  padding: 1.1rem 2.5rem 1.1rem 2.5rem;
+  border: 2px solid #1976d2;
+  border-radius: 10px;
+  resize: vertical;
+  background: #f8fafc;
+  color: #222;
+  box-shadow: 0 2px 8px 0 rgba(25, 118, 210, 0.07);
+  transition: border 0.2s, box-shadow 0.2s;
+}
+.nlp-input:focus {
+  border: 2.5px solid #1565c0;
+  box-shadow: 0 4px 16px 0 rgba(25, 118, 210, 0.13);
+  outline: none;
+}
+.nlp-input:focus {
+  border: 1.5px solid #1976d2;
+  outline: none;
+}
+.nlp-mic-icon {
+  position: absolute;
+  left: 10px;
+  top: 16px;
+  color: #b6c6e3;
+  font-size: 1.3rem;
+  cursor: not-allowed;
+}
+.nlp-clear-btn {
+  position: absolute;
+  right: 50px;
+  top: 16px;
+  color: #b6c6e3;
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.nlp-clear-btn:hover {
+  color: #1976d2;
+}
+.nlp-search-btn {
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1.2rem;
+  font-size: 1.2rem;
+  margin-left: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.nlp-search-btn:disabled {
+  background: #b6c6e3;
+  cursor: not-allowed;
+}
+.nlp-spinner {
+  font-size: 1.2em;
+}
+.spin {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.nlp-hints {
+  margin-top: 0.7rem;
+  font-size: 1rem;
+  color: #1976d2;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.nlp-hint {
+  display: inline-block;
+  background: #f0f4ff;
+  color: #1976d2;
+  border-radius: 3px;
+  padding: 2px 8px;
+  margin: 2px 4px 2px 0;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 0.98rem;
+}
+.nlp-hint:hover {
+  background: #dbeafe;
+}
+.nlp-side-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+}
+.nlp-history {
+  min-width: 220px;
+  max-width: 260px;
+  background: #f8fafc;
+  color: #1976d2;
+  position: relative;
+}
+.nlp-history-list {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.nlp-history-item {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1976d2;
+  border-radius: 3px;
+  padding: 2px 8px;
+  margin: 2px 4px 2px 0;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 0.98rem;
+}
+.nlp-history-item:hover {
+  background: #bbdefb;
+}
+.nlp-clear-history {
+  background: none;
+  border: none;
+  color: #b6c6e3;
+  font-size: 1.1rem;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.nlp-clear-history:hover {
+  color: #1976d2;
+}
+.nlp-card.error {
+  color: #d32f2f;
+  background: #fff0f0;
+  border: 1px solid #ffcdd2;
+}
+.nlp-card.result {
+  background: #e3f2fd;
+  font-size: 1.08rem;
+  word-break: break-word;
+  min-width: 260px;
+  flex: 1;
+}
+.nlp-explanation {
+  margin-bottom: 0.5rem;
+}
+.nlp-action {
+  margin-bottom: 0.5rem;
+}
+.nlp-nodes, .nlp-edges {
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.nlp-node-badge {
+  background: #1976d2;
+  color: #fff;
+  border-radius: 12px;
+  padding: 2px 10px;
+  margin: 0 4px 4px 0;
+  font-size: 0.98rem;
+  display: inline-block;
+}
+.nlp-edges pre {
+  background: #f8fafc;
+  border-radius: 4px;
+  padding: 0.5rem;
+  font-size: 0.98rem;
+  overflow-x: auto;
+  margin: 0;
+}
+.nlp-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #1976d2;
+  font-size: 1.1rem;
+  background: #f0f4ff;
+}
+@media (max-width: 900px) {
+  .nlp-side-row {
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+  .nlp-card.result, .nlp-history {
+    min-width: 0;
+    max-width: 100%;
+  }
+}

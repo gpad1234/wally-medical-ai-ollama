@@ -1,0 +1,18 @@
+{
+  "name": "medical-ai-llm-service",
+  "version": "1.0.0",
+  "description": "Medical AI Reasoner - LLM Symptom Extraction Service",
+  "type": "module",
+  "main": "llm-service.js",
+  "scripts": {
+    "start": "node llm-service.js",
+    "dev": "node --watch llm-service.js"
+  },
+  "keywords": ["medical", "ai", "llm", "ollama", "healthcare"],
+  "author": "Medical AI Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}

@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Database - Chat Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 800px;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .chat-header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            text-align: right;
+        }
+
+        .message-content {
+            display: inline-block;
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-content {
+            background: #667eea;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.assistant .message-content {
+            background: white;
+            color: #333;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .message-content pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 12px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 10px 0;
+            font-size: 13px;
+        }
+
+        .message-content code {
+            background: rgba(0,0,0,0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .message-content ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .message-content li {
+            margin: 5px 0;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 18px;
+            width: fit-content;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .typing-indicator.active {
+            display: block;
+        }
+
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #999;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: bounce 1.4s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+
+        #chatInput {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 24px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        #chatInput:focus {
+            border-color: #667eea;
+        }
+
+        #sendButton {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        #sendButton:hover {
+            transform: scale(1.05);
+        }
+
+        #sendButton:active {
+            transform: scale(0.95);
+        }
+
+        .examples {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .examples span {
+            display: inline-block;
+            background: #f0f0f0;
+            padding: 4px 10px;
+            border-radius: 12px;
+            margin: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .examples span:hover {
+            background: #e0e0e0;
+        }
+
+        .error {
+            color: #e74c3c;
+        }
+
+        .success {
+            color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>🤖 Graph Database Chat</h1>
+            <p>Ask questions in natural language</p>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="message assistant">
+                <div class="message-content">
+                    👋 Hi! I can help you query the graph database. Try asking:
+                    <ul>
+                        <li>"Show me all nodes"</li>
+                        <li>"Find nodes with role Developer"</li>
+                        <li>"Show path from Alice to Frank"</li>
+                        <li>"Add node George" or "Add node George name George role Tester team QA"</li>
+                        <li>"Edit node Bob role Manager team Backend"</li>
+                        <li>"Add edge from Alice to George weight 5"</li>
+                        <li>"Remove edge from Bob to Charlie"</li>
+                        <li>"Delete node Bob"</li>
+                        <li>"Show statistics"</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+        <div class="chat-input-container">
+            <div class="chat-input-wrapper">
+                <input type="text" id="chatInput" placeholder="Type your question..." />
+                <button id="sendButton">Send</button>
+            </div>
+            <div class="examples">
+                <strong>Quick examples:</strong>
+                <span onclick="sendExample('show all nodes')">all nodes</span>
+                <span onclick="sendExample('find role Developer')">developers</span>
+                <span onclick="sendExample('path from Alice to Frank')">find path</span>
+                <span onclick="sendExample('add edge from Alice to Bob weight 3')">add edge</span>
+                <span onclick="sendExample('edit node Charlie role Manager')">edit node</span>
+                <span onclick="sendExample('show stats')">stats</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        // Add user message to chat
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = content;
+            
+            messageDiv.appendChild(contentDiv);
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Show typing indicator
+        function showTyping() {
+            typingIndicator.classList.add('active');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Hide typing indicator
+        function hideTyping() {
+            typingIndicator.classList.remove('active');
+        }
+
+        // Parse natural language query
+        async function parseQuery(query) {
+            const lowerQuery = query.toLowerCase().trim();
+
+            try {
+                // Show all nodes
+                if (lowerQuery.includes('show') && lowerQuery.includes('node')) {
+                    const response = await fetch('/api/graph/nodes');
+                    const data = await response.json();
+                    return formatNodes(data.nodes);
+                }
+
+                // Show statistics
+                if (lowerQuery.includes('stat') || lowerQuery.includes('count')) {
+                    const response = await fetch('/api/graph/stats');
+                    const data = await response.json();
+                    return `📊 <strong>Graph Statistics:</strong><br>
+                            • Nodes: ${data.node_count}<br>
+                            • Edges: ${data.edge_count}<br>
+                            • Directed: ${data.directed ? 'Yes' : 'No'}<br>
+                            • Weighted: ${data.weighted ? 'Yes' : 'No'}`;
+                }
+
+                // Find nodes by property
+                const findMatch = lowerQuery.match(/find.*?(role|team|name)\s+(\w+)/);
+                if (findMatch || lowerQuery.includes('search')) {
+                    const key = findMatch ? findMatch[1] : 'role';
+                    const value = findMatch ? findMatch[2] : '';
+                    
+                    const response = await fetch('/api/graph/search', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ key, value })
+                    });
+                    const data = await response.json();
+                    return formatSearchResults(data);
+                }
+
+                // Find path between nodes
+                const pathMatch = query.match(/path.*?from\s+(\w+)\s+to\s+(\w+)/i);
+                if (pathMatch) {
+                    const [, start, target] = pathMatch;
+                    const response = await fetch('/api/graph/shortest_path', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ start, target })
+                    });
+                    const data = await response.json();
+                    if (data.error) return `❌ Error: ${data.error}`;
+                    return `🛤️ <strong>Shortest path from ${start} to ${target}:</strong><br>
+                            ${data.path.join(' → ')}<br>
+                            Distance: ${data.cost}`;
+                }
+
+                // BFS traversal
+                const bfsMatch = query.match(/bfs.*?from\s+(\w+)/i);
+                if (bfsMatch) {
+                    const start = bfsMatch[1];
+                    const response = await fetch('/api/graph/bfs', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ start })
+                    });
+                    const data = await response.json();
+                    if (data.error) return `❌ Error: ${data.error}`;
+                    return `🔍 <strong>BFS from ${start}:</strong><br>
+                            Visited: ${data.visited.join(', ')}`;
+                }
+
+                // Add node
+                // Supports: "add node George role Tester" or "add node George name George role Tester"
+                const addMatch = query.match(/add.*?node.*?(\w+)(?:.*?name\s+(\w+))?(?:.*?role\s+(\w+))?(?:.*?team\s+(\w+))?/i);
+                if (addMatch && addMatch[1]) {
+                    const [, id, name, role, team] = addMatch;
+                    const nodeData = {};
+                    if (name) nodeData.name = name;
+                    if (role) nodeData.role = role;
+                    if (team) nodeData.team = team;
+                    
+                    const response = await fetch('/api/graph/node', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            id, 
+                            data: nodeData
+                        })
+                    });
+                    const data = await response.json();
+                    if (data.error) return `❌ Error: ${data.error}`;
+                    
+                    const details = [];
+                    if (name) details.push(`name: ${name}`);
+                    if (role) details.push(`role: ${role}`);
+                    if (team) details.push(`team: ${team}`);
+                    const detailStr = details.length > 0 ? ` (${details.join(', ')})` : '';
+                    
+                    return `✅ Added node <strong>${id}</strong>${detailStr}`;
+                }
+
+                // Delete node
+                const deleteMatch = query.match(/delete.*?node\s+(\w+)/i);
+                if (deleteMatch) {
+                    const id = deleteMatch[1];
+                    const response = await fetch(`/api/graph/node/${id}`, {
+                        method: 'DELETE'
+                    });
+                    const data = await response.json();
+                    if (data.error) return `❌ Error: ${data.error}`;
+                    return `✅ Deleted node <strong>${id}</strong>`;
+                }
+
+                // Edit/Update node
+                // Supports: "edit node Bob role Manager" or "edit node Bob name Bobby role Manager team Backend"
+                const editMatch = query.match(/edit.*?node\s+(\w+)(?:.*?name\s+(\w+))?(?:.*?role\s+(\w+))?(?:.*?team\s+(\w+))?/i);
+                if (editMatch && editMatch[1] && (editMatch[2] || editMatch[3] || editMatch[4])) {
+                    const [, id, name, role, team] = editMatch;
+                    const nodeData = {};
+                    if (name) nodeData.name = name;
+                    if (role) nodeData.role = role;
+                    if (team) nodeData.team = team;
+                    
+                    const response = await fetch(`/api/graph/node/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ data: nodeData })
+                    });
+                    const data = await response.json();
+                    if (data.error) return `❌ Error: ${data.error}`;
+                    
+                    const details = [];
+                    if (name) details.push(`name: ${name}`);
+                    if (role) details.push(`role: ${role}`);
+                    if (team) details.push(`team: ${team}`);
+                    const detailStr = details.join(', ');
+                    
+                    return `✅ Updated node <strong>${id}</strong> with ${detailStr}`;
+                }
+
+                // Add edge
+                const addEdgeMatch = query.match(/add.*?edge.*?from\s+(\w+)\s+to\s+(\w+)(?:.*?weight\s+(\d+))?/i);
+                if (addEdgeMatch) {
+                    const [, fromNode, toNode, weight] = addEdgeMatch;
+                    const response = await fetch('/api/graph/edge', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            from: fromNode, 
+                            to: toNode, 
+                            weight: weight ? parseInt(weight) : 1 
+                        })
+                    });
+                    const data = await response.json();
+                    if (data.error) return `❌ Error: ${data.error}`;
+                    return `✅ Added edge from <strong>${fromNode}</strong> to <strong>${toNode}</strong>${weight ? ` (weight: ${weight})` : ''}`;
+                }
+
+                // Remove/Delete edge
+                const removeEdgeMatch = query.match(/(?:remove|delete).*?edge.*?from\s+(\w+)\s+to\s+(\w+)/i);
+                if (removeEdgeMatch) {
+                    const [, fromNode, toNode] = removeEdgeMatch;
+                    const response = await fetch('/api/graph/edge', {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ from: fromNode, to: toNode })
+                    });
+                    const data = await response.json();
+                    if (data.error) return `❌ Error: ${data.error}`;
+                    return `✅ Removed edge from <strong>${fromNode}</strong> to <strong>${toNode}</strong>`;
+                }
+
+                // Show neighbors
+                const neighborMatch = query.match(/neighbor.*?(\w+)/i);
+                if (neighborMatch) {
+                    const id = neighborMatch[1];
+                    const response = await fetch(`/api/graph/neighbors/${id}`);
+                    const data = await response.json();
+                    if (data.error) return `❌ Error: ${data.error}`;
+                    return formatNeighbors(data);
+                }
+
+                // Default: show help
+                return `❓ I didn't understand that. Try:<br>
+                        • "show all nodes"<br>
+                        • "find role Developer"<br>
+                        • "path from Alice to Frank"<br>
+                        • "add node George role Tester"<br>
+                        • "edit node Bob role Manager"<br>
+                        • "add edge from Alice to George weight 5"<br>
+                        • "remove edge from Bob to Charlie"<br>
+                        • "delete node Bob"<br>
+                        • "show stats"`;
+
+            } catch (error) {
+                return `❌ Error: ${error.message}`;
+            }
+        }
+
+        // Format nodes list
+        function formatNodes(nodes) {
+            if (!nodes || nodes.length === 0) {
+                return '📭 No nodes found.';
+            }
+            let html = `📦 <strong>Found ${nodes.length} nodes:</strong><br><br>`;
+            nodes.forEach(node => {
+                html += `<strong>${node.id}</strong><br>`;
+                if (node.data) {
+                    Object.entries(node.data).forEach(([key, value]) => {
+                        html += `&nbsp;&nbsp;• ${key}: ${value}<br>`;
+                    });
+                }
+                html += '<br>';
+            });
+            return html;
+        }
+
+        // Format search results
+        function formatSearchResults(data) {
+            if (data.count === 0) {
+                return `📭 No nodes found matching ${data.key}=${data.value}`;
+            }
+            let html = `🔍 <strong>Found ${data.count} nodes:</strong><br><br>`;
+            data.results.forEach(node => {
+                html += `<strong>${node.id}</strong><br>`;
+                if (node.data) {
+                    Object.entries(node.data).forEach(([key, value]) => {
+                        const highlight = key === data.key ? ' style="background: yellow; padding: 2px 4px;"' : '';
+                        html += `&nbsp;&nbsp;• ${key}: <span${highlight}>${value}</span><br>`;
+                    });
+                }
+                html += '<br>';
+            });
+            return html;
+        }
+
+        // Format neighbors
+        function formatNeighbors(data) {
+            if (!data.neighbors || data.neighbors.length === 0) {
+                return `📭 No neighbors found for ${data.node_id}`;
+            }
+            let html = `👥 <strong>Neighbors of ${data.node_id}:</strong><br><br>`;
+            data.neighbors.forEach(neighbor => {
+                html += `• ${neighbor.to}`;
+                if (neighbor.weight !== undefined) {
+                    html += ` (weight: ${neighbor.weight})`;
+                }
+                html += '<br>';
+            });
+            return html;
+        }
+
+        // Send message
+        async function sendMessage() {
+            const query = chatInput.value.trim();
+            if (!query) return;
+
+            // Add user message
+            addMessage(query, true);
+            chatInput.value = '';
+
+            // Show typing
+            showTyping();
+
+            // Process query
+            const response = await parseQuery(query);
+            
+            // Hide typing and show response
+            setTimeout(() => {
+                hideTyping();
+                addMessage(response);
+            }, 500);
+        }
+
+        // Send example query
+        function sendExample(text) {
+            chatInput.value = text;
+            sendMessage();
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // Focus input on load
+        chatInput.focus();
+    </script>
+</body>
+</html>

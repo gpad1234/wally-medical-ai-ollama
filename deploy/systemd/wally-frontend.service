@@ -1,0 +1,21 @@
+[Unit]
+Description=WALLY Frontend Preview Server (Development)
+After=network.target wally-ontology-api.service
+
+[Service]
+Type=simple
+User=wally
+Group=wally
+WorkingDirectory=/opt/wally-clean/graph-ui
+ExecStart=/usr/bin/npm run preview -- --host 0.0.0.0 --port 5173
+Restart=always
+RestartSec=10
+StandardOutput=append:/opt/wally-clean/logs/frontend.log
+StandardError=append:/opt/wally-clean/logs/frontend_error.log
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

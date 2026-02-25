@@ -1,0 +1,369 @@
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix med:   <http://wally.io/medical#> .
+@prefix resp:  <http://wally.io/medical/resp#> .
+@prefix gi:    <http://wally.io/medical/gi#> .
+@prefix neuro: <http://wally.io/medical/neuro#> .
+@prefix cardio:<http://wally.io/medical/cardio#> .
+@prefix symp:  <http://wally.io/medical/symp#> .
+@prefix treat: <http://wally.io/medical/treat#> .
+@prefix hier:  <http://wally.io/medical/hier#> .
+
+# =============================================================
+# WALLY Medical AI Ontology
+# Source of truth for the Medical AI Reasoner component.
+# Edit this file to add/remove diseases, symptoms & treatments.
+# Served by Flask at GET /api/ontology/medical
+# =============================================================
+
+# ----- OWL Classes -------------------------------------------
+
+med:Disease   a owl:Class ; rdfs:label "Disease" .
+med:Symptom   a owl:Class ; rdfs:label "Symptom" .
+med:Treatment a owl:Class ; rdfs:label "Treatment" .
+med:HierarchyNode a owl:Class ; rdfs:label "Hierarchy Node" .
+
+# ----- Custom Properties -------------------------------------
+
+med:id          a owl:AnnotationProperty ; rdfs:label "Compact ID" .
+med:severity    a owl:DatatypeProperty   ; rdfs:label "Severity" .
+med:description a owl:DatatypeProperty   ; rdfs:label "Description" .
+med:parent      a owl:AnnotationProperty ; rdfs:label "Parent ID" .
+med:treatType   a owl:DatatypeProperty   ; rdfs:label "Treatment Type" .
+
+# Weighted symptom relationship (blank-node pattern)
+med:hasSymptomWeight a owl:ObjectProperty ; rdfs:label "Has Symptom Weight" .
+med:weightSymptom    a owl:ObjectProperty ; rdfs:label "Weight Target Symptom" .
+med:weightValue      a owl:DatatypeProperty ; rdfs:label "Weight Value" .
+
+# Disease→Treatment and Disease→Symptom membership
+med:hasTreatment a owl:ObjectProperty ; rdfs:label "Has Treatment" .
+med:hasSymptom   a owl:ObjectProperty ; rdfs:label "Has Symptom" .
+
+# =============================================================
+# DISEASES
+# =============================================================
+
+resp:CommonCold a med:Disease, owl:NamedIndividual ;
+    med:id          "resp:CommonCold" ;
+    rdfs:label      "Common Cold" ;
+    med:parent      "resp:UpperRespiratoryInfection" ;
+    med:severity    "mild" ;
+    med:description "Viral infection of upper respiratory tract" ;
+    med:hasSymptom  symp:RunnyNose, symp:SoreThroat, symp:Cough, symp:Sneezing, symp:Fatigue ;
+    med:hasTreatment treat:Rest, treat:Fluids, treat:OverTheCounterMeds .
+
+resp:Influenza a med:Disease, owl:NamedIndividual ;
+    med:id          "resp:Influenza" ;
+    rdfs:label      "Influenza (Flu)" ;
+    med:parent      "resp:ViralRespiratoryInfection" ;
+    med:severity    "moderate" ;
+    med:description "Acute viral respiratory infection with systemic symptoms" ;
+    med:hasSymptom  symp:Fever, symp:Cough, symp:Fatigue, symp:BodyAches, symp:Headache, symp:SoreThroat ;
+    med:hasTreatment treat:AntiviralMeds, treat:Rest, treat:Fluids .
+
+resp:Pneumonia a med:Disease, owl:NamedIndividual ;
+    med:id          "resp:Pneumonia" ;
+    rdfs:label      "Pneumonia" ;
+    med:parent      "resp:LowerRespiratoryInfection" ;
+    med:severity    "severe" ;
+    med:description "Inflammation of lung tissue, often bacterial" ;
+    med:hasSymptom  symp:Fever, symp:Cough, symp:ChestPain, symp:ShortnessOfBreath, symp:Fatigue ;
+    med:hasTreatment treat:Antibiotics, treat:Hospitalization, treat:OxygenTherapy .
+
+resp:Bronchitis a med:Disease, owl:NamedIndividual ;
+    med:id          "resp:Bronchitis" ;
+    rdfs:label      "Acute Bronchitis" ;
+    med:parent      "resp:LowerRespiratoryInfection" ;
+    med:severity    "moderate" ;
+    med:description "Inflammation of bronchial tubes" ;
+    med:hasSymptom  symp:Cough, symp:Mucus, symp:ChestDiscomfort, symp:Fatigue, symp:SoreThroat ;
+    med:hasTreatment treat:Rest, treat:Fluids, treat:CoughMedicine .
+
+gi:Gastroenteritis a med:Disease, owl:NamedIndividual ;
+    med:id          "gi:Gastroenteritis" ;
+    rdfs:label      "Gastroenteritis" ;
+    med:parent      "gi:DigestiveInfection" ;
+    med:severity    "moderate" ;
+    med:description "Inflammation of stomach and intestines" ;
+    med:hasSymptom  symp:Nausea, symp:Vomiting, symp:Diarrhea, symp:AbdominalPain, symp:Fever ;
+    med:hasTreatment treat:Fluids, treat:Rest, treat:ElectrolyteReplacement .
+
+neuro:Migraine a med:Disease, owl:NamedIndividual ;
+    med:id          "neuro:Migraine" ;
+    rdfs:label      "Migraine" ;
+    med:parent      "neuro:PrimaryHeadache" ;
+    med:severity    "moderate" ;
+    med:description "Recurrent severe headache disorder" ;
+    med:hasSymptom  symp:SevereHeadache, symp:Nausea, symp:LightSensitivity, symp:SoundSensitivity ;
+    med:hasTreatment treat:PainRelievers, treat:DarkRoom, treat:Rest .
+
+cardio:Hypertension a med:Disease, owl:NamedIndividual ;
+    med:id          "cardio:Hypertension" ;
+    rdfs:label      "Hypertension" ;
+    med:parent      "cardio:CardiovascularDisorder" ;
+    med:severity    "moderate" ;
+    med:description "Persistently elevated blood pressure" ;
+    med:hasSymptom  symp:Headache, symp:Dizziness, symp:ChestPain ;
+    med:hasTreatment treat:BloodPressureMeds, treat:LifestyleChanges, treat:DietModification .
+
+# =============================================================
+# SYMPTOMS  (with weights per disease)
+# Each med:hasSymptomWeight blank node records one weight edge.
+# =============================================================
+
+symp:Fever a med:Symptom, owl:NamedIndividual ;
+    med:id      "symp:Fever" ;
+    rdfs:label  "Fever" ;
+    med:hasSymptomWeight [ med:weightSymptom symp:Fever ; med:weightValue "0.9"^^xsd:decimal ;  med:weightDisease "resp:Influenza" ] ;
+    med:hasSymptomWeight [ med:weightSymptom symp:Fever ; med:weightValue "0.85"^^xsd:decimal ; med:weightDisease "resp:Pneumonia" ] ;
+    med:hasSymptomWeight [ med:weightSymptom symp:Fever ; med:weightValue "0.7"^^xsd:decimal ;  med:weightDisease "gi:Gastroenteritis" ] .
+
+symp:Cough a med:Symptom, owl:NamedIndividual ;
+    med:id      "symp:Cough" ;
+    rdfs:label  "Cough" ;
+    med:hasSymptomWeight [ med:weightValue "0.8"^^xsd:decimal ;  med:weightDisease "resp:CommonCold" ] ;
+    med:hasSymptomWeight [ med:weightValue "0.85"^^xsd:decimal ; med:weightDisease "resp:Influenza" ] ;
+    med:hasSymptomWeight [ med:weightValue "0.95"^^xsd:decimal ; med:weightDisease "resp:Bronchitis" ] ;
+    med:hasSymptomWeight [ med:weightValue "0.9"^^xsd:decimal ;  med:weightDisease "resp:Pneumonia" ] .
+
+symp:RunnyNose a med:Symptom, owl:NamedIndividual ;
+    med:id      "symp:RunnyNose" ;
+    rdfs:label  "Runny Nose" ;
+    med:hasSymptomWeight [ med:weightValue "0.95"^^xsd:decimal ; med:weightDisease "resp:CommonCold" ] .
+
+symp:SoreThroat a med:Symptom, owl:NamedIndividual ;
+    med:id      "symp:SoreThroat" ;
+    rdfs:label  "Sore Throat" ;
+    med:hasSymptomWeight [ med:weightValue "0.85"^^xsd:decimal ; med:weightDisease "resp:CommonCold" ] ;
+    med:hasSymptomWeight [ med:weightValue "0.7"^^xsd:decimal ;  med:weightDisease "resp:Influenza" ] ;
+    med:hasSymptomWeight [ med:weightValue "0.6"^^xsd:decimal ;  med:weightDisease "resp:Bronchitis" ] .
+
+symp:Sneezing a med:Symptom, owl:NamedIndividual ;
+    med:id      "symp:Sneezing" ;
+    rdfs:label  "Sneezing" ;
+    med:hasSymptomWeight [ med:weightValue "0.9"^^xsd:decimal ; med:weightDisease "resp:CommonCold" ] .
+
+symp:Fatigue a med:Symptom, owl:NamedIndividual ;
+    med:id      "symp:Fatigue" ;
+    rdfs:label  "Fatigue" ;
+    med:hasSymptomWeight [ med:weightValue "0.7"^^xsd:decimal ;  med:weightDisease "resp:CommonCold" ] ;
+    med:hasSymptomWeight [ med:weightValue "0.85"^^xsd:decimal ; med:weightDisease "resp:Influenza" ] ;
+    med:hasSymptomWeight [ med:weightValue "0.8"^^xsd:decimal ;  med:weightDisease "resp:Pneumonia" ] ;
+    med:hasSymptomWeight [ med:weightValue "0.75"^^xsd:decimal ; med:weightDisease "resp:Bronchitis" ] .
+
+symp:BodyAches a med:Symptom, owl:NamedIndividual ;
+    med:id      "symp:BodyAches" ;
+    rdfs:label  "Body Aches" ;
+    med:hasSymptomWeight [ med:weightValue "0.9"^^xsd:decimal ; med:weightDisease "resp:Influenza" ] .
+
+symp:Headache a med:Symptom, owl:NamedIndividual ;
+    med:id      "symp:Headache" ;
+    rdfs:label  "Headache" ;
+    med:hasSymptomWeight [ med:weightValue "0.75"^^xsd:decimal ; med:weightDisease "resp:Influenza" ] ;
+    med:hasSymptomWeight [ med:weightValue "0.5"^^xsd:decimal ;  med:weightDisease "neuro:Migraine" ] ;
+    med:hasSymptomWeight [ med:weightValue "0.6"^^xsd:decimal ;  med:weightDisease "cardio:Hypertension" ] .
+
+symp:ChestPain a med:Symptom, owl:NamedIndividual ;
+    med:id      "symp:ChestPain" ;
+    rdfs:label  "Chest Pain" ;
+    med:hasSymptomWeight [ med:weightValue "0.8"^^xsd:decimal ;  med:weightDisease "resp:Pneumonia" ] ;
+    med:hasSymptomWeight [ med:weightValue "0.65"^^xsd:decimal ; med:weightDisease "cardio:Hypertension" ] .
+
+symp:ShortnessOfBreath a med:Symptom, owl:NamedIndividual ;
+    med:id      "symp:ShortnessOfBreath" ;
+    rdfs:label  "Shortness of Breath" ;
+    med:hasSymptomWeight [ med:weightValue "0.85"^^xsd:decimal ; med:weightDisease "resp:Pneumonia" ] .
+
+symp:ChestDiscomfort a med:Symptom, owl:NamedIndividual ;
+    med:id      "symp:ChestDiscomfort" ;
+    rdfs:label  "Chest Discomfort" ;
+    med:hasSymptomWeight [ med:weightValue "0.7"^^xsd:decimal ; med:weightDisease "resp:Bronchitis" ] .
+
+symp:Mucus a med:Symptom, owl:NamedIndividual ;
+    med:id      "symp:Mucus" ;
+    rdfs:label  "Mucus Production" ;
+    med:hasSymptomWeight [ med:weightValue "0.85"^^xsd:decimal ; med:weightDisease "resp:Bronchitis" ] .
+
+symp:Nausea a med:Symptom, owl:NamedIndividual ;
+    med:id      "symp:Nausea" ;
+    rdfs:label  "Nausea" ;
+    med:hasSymptomWeight [ med:weightValue "0.9"^^xsd:decimal ;  med:weightDisease "gi:Gastroenteritis" ] ;
+    med:hasSymptomWeight [ med:weightValue "0.7"^^xsd:decimal ;  med:weightDisease "neuro:Migraine" ] .
+
+symp:Vomiting a med:Symptom, owl:NamedIndividual ;
+    med:id      "symp:Vomiting" ;
+    rdfs:label  "Vomiting" ;
+    med:hasSymptomWeight [ med:weightValue "0.85"^^xsd:decimal ; med:weightDisease "gi:Gastroenteritis" ] .
+
+symp:Diarrhea a med:Symptom, owl:NamedIndividual ;
+    med:id      "symp:Diarrhea" ;
+    rdfs:label  "Diarrhea" ;
+    med:hasSymptomWeight [ med:weightValue "0.9"^^xsd:decimal ; med:weightDisease "gi:Gastroenteritis" ] .
+
+symp:AbdominalPain a med:Symptom, owl:NamedIndividual ;
+    med:id      "symp:AbdominalPain" ;
+    rdfs:label  "Abdominal Pain" ;
+    med:hasSymptomWeight [ med:weightValue "0.8"^^xsd:decimal ; med:weightDisease "gi:Gastroenteritis" ] .
+
+symp:SevereHeadache a med:Symptom, owl:NamedIndividual ;
+    med:id      "symp:SevereHeadache" ;
+    rdfs:label  "Severe Headache" ;
+    med:hasSymptomWeight [ med:weightValue "0.95"^^xsd:decimal ; med:weightDisease "neuro:Migraine" ] .
+
+symp:LightSensitivity a med:Symptom, owl:NamedIndividual ;
+    med:id      "symp:LightSensitivity" ;
+    rdfs:label  "Light Sensitivity" ;
+    med:hasSymptomWeight [ med:weightValue "0.85"^^xsd:decimal ; med:weightDisease "neuro:Migraine" ] .
+
+symp:SoundSensitivity a med:Symptom, owl:NamedIndividual ;
+    med:id      "symp:SoundSensitivity" ;
+    rdfs:label  "Sound Sensitivity" ;
+    med:hasSymptomWeight [ med:weightValue "0.8"^^xsd:decimal ; med:weightDisease "neuro:Migraine" ] .
+
+symp:Dizziness a med:Symptom, owl:NamedIndividual ;
+    med:id      "symp:Dizziness" ;
+    rdfs:label  "Dizziness" ;
+    med:hasSymptomWeight [ med:weightValue "0.7"^^xsd:decimal ; med:weightDisease "cardio:Hypertension" ] .
+
+# =============================================================
+# TREATMENTS
+# =============================================================
+
+treat:Rest                  a med:Treatment, owl:NamedIndividual ; med:id "treat:Rest" ;                  rdfs:label "Rest and Sleep" ;                  med:treatType "general" .
+treat:Fluids                a med:Treatment, owl:NamedIndividual ; med:id "treat:Fluids" ;                rdfs:label "Increase Fluid Intake" ;           med:treatType "general" .
+treat:OverTheCounterMeds    a med:Treatment, owl:NamedIndividual ; med:id "treat:OverTheCounterMeds" ;    rdfs:label "Over-the-Counter Medications" ;    med:treatType "medication" .
+treat:AntiviralMeds         a med:Treatment, owl:NamedIndividual ; med:id "treat:AntiviralMeds" ;         rdfs:label "Antiviral Medications" ;           med:treatType "prescription" .
+treat:Antibiotics           a med:Treatment, owl:NamedIndividual ; med:id "treat:Antibiotics" ;           rdfs:label "Antibiotics" ;                     med:treatType "prescription" .
+treat:Hospitalization       a med:Treatment, owl:NamedIndividual ; med:id "treat:Hospitalization" ;       rdfs:label "Hospital Admission" ;              med:treatType "urgent" .
+treat:OxygenTherapy         a med:Treatment, owl:NamedIndividual ; med:id "treat:OxygenTherapy" ;         rdfs:label "Oxygen Therapy" ;                  med:treatType "urgent" .
+treat:CoughMedicine         a med:Treatment, owl:NamedIndividual ; med:id "treat:CoughMedicine" ;         rdfs:label "Cough Suppressants" ;              med:treatType "medication" .
+treat:ElectrolyteReplacement a med:Treatment, owl:NamedIndividual ; med:id "treat:ElectrolyteReplacement" ; rdfs:label "Electrolyte Replacement" ;      med:treatType "general" .
+treat:PainRelievers         a med:Treatment, owl:NamedIndividual ; med:id "treat:PainRelievers" ;         rdfs:label "Pain Relief Medication" ;          med:treatType "medication" .
+treat:DarkRoom              a med:Treatment, owl:NamedIndividual ; med:id "treat:DarkRoom" ;              rdfs:label "Dark, Quiet Room" ;                med:treatType "general" .
+treat:BloodPressureMeds     a med:Treatment, owl:NamedIndividual ; med:id "treat:BloodPressureMeds" ;     rdfs:label "Blood Pressure Medication" ;       med:treatType "prescription" .
+treat:LifestyleChanges      a med:Treatment, owl:NamedIndividual ; med:id "treat:LifestyleChanges" ;      rdfs:label "Lifestyle Modifications" ;         med:treatType "general" .
+treat:DietModification      a med:Treatment, owl:NamedIndividual ; med:id "treat:DietModification" ;      rdfs:label "Dietary Changes" ;                 med:treatType "general" .
+
+# =============================================================
+# HIERARCHY  (classification tree above diseases)
+# =============================================================
+
+hier:UpperRespiratoryInfection a med:HierarchyNode, owl:NamedIndividual ;
+    med:id    "resp:UpperRespiratoryInfection" ;
+    rdfs:label "Upper Respiratory Infection" ;
+    med:parent "resp:RespiratoryInfection" .
+
+hier:LowerRespiratoryInfection a med:HierarchyNode, owl:NamedIndividual ;
+    med:id    "resp:LowerRespiratoryInfection" ;
+    rdfs:label "Lower Respiratory Infection" ;
+    med:parent "resp:RespiratoryInfection" .
+
+hier:ViralRespiratoryInfection a med:HierarchyNode, owl:NamedIndividual ;
+    med:id    "resp:ViralRespiratoryInfection" ;
+    rdfs:label "Viral Respiratory Infection" ;
+    med:parent "resp:RespiratoryInfection" .
+
+hier:RespiratoryInfection a med:HierarchyNode, owl:NamedIndividual ;
+    med:id    "resp:RespiratoryInfection" ;
+    rdfs:label "Respiratory Infection" ;
+    med:parent "owl:Disease" .
+
+hier:DigestiveInfection a med:HierarchyNode, owl:NamedIndividual ;
+    med:id    "gi:DigestiveInfection" ;
+    rdfs:label "Digestive System Infection" ;
+    med:parent "owl:Disease" .
+
+hier:PrimaryHeadache a med:HierarchyNode, owl:NamedIndividual ;
+    med:id    "neuro:PrimaryHeadache" ;
+    rdfs:label "Primary Headache Disorder" ;
+    med:parent "neuro:NeurologicalDisorder" .
+
+hier:NeurologicalDisorder a med:HierarchyNode, owl:NamedIndividual ;
+    med:id    "neuro:NeurologicalDisorder" ;
+    rdfs:label "Neurological Disorder" ;
+    med:parent "owl:Disease" .
+
+hier:CardiovascularDisorder a med:HierarchyNode, owl:NamedIndividual ;
+    med:id    "cardio:CardiovascularDisorder" ;
+    rdfs:label "Cardiovascular Disorder" ;
+    med:parent "owl:Disease" .
+
+
+# ── Disease Ontology Enrichment (auto-generated by enrich_from_do.py) ──
+# Source: https://api.disease-ontology.org/v1
+# Populated: disease-ontology.org (Human Disease Ontology, CC BY 4.0)
+
+
+### DO-enriched annotations for resp:CommonCold
+resp:CommonCold
+    med:doid "DOID:10459" ;
+    rdfs:comment "An upper respiratory tract disease which involves inflammation of the mucous membranes of the nose, throat, eyes, and eustachian tubes with watery then purulent discharge. This is an acute contagious disease caused by rhinoviruses, human parainfluenza viruses, human respiratory syncytial virus, influenza viruses, adenoviruses, enteroviruses, or metapneumovirus." ;
+    med:synonym "acute coryza" ;
+    med:synonym "acute nasopharyngitis" ;
+    med:synonym "acute rhinitis" ;
+    med:synonym "Acute viral rhinopharyngitis" ;
+    med:icd10Ref "J00" ;
+    med:meshRef "D003139" .
+
+### DO-enriched annotations for resp:Influenza
+resp:Influenza
+    med:doid "DOID:8469" ;
+    rdfs:comment "A viral infectious disease that results in infection, located in respiratory tract, has_material_basis_in Influenzavirus A (Alphainfluenzavirus), has_material_basis_in Influenzavirus B (Betainfluenzavirus), or has_material_basis_in Influenzavirus C (Gammainfluenzavirus), which are transmitted_by droplet spread of oronasal secretions during coughing, sneezing, or talking from an infected person. It is a highly contagious disease that affects birds and mammals and has_symptom chills, has_symptom fever, has_symptom sore throat, has_symptom runny nose, has_symptom muscle pains, has_symptom severe headache, has_symptom cough, and has_symptom weakness." ;
+    med:synonym "flu" ;
+    med:synonym "influenza with non-respiratory manifestation" ;
+    med:synonym "Influenza with other manifestations" ;
+    med:icd10Ref "J11.1" ;
+    med:meshRef "D007251" .
+
+### DO-enriched annotations for resp:Pneumonia
+resp:Pneumonia
+    med:doid "DOID:552" ;
+    rdfs:comment "A lung disease that involves lung parenchyma or alveolar inflammation and abnormal alveolar filling with fluid (consolidation and exudation). It results from a variety of causes including infection with bacteria, viruses, fungi or parasites, and chemical or physical injury to the lungs. It is accompanied by fever, chills, cough, and difficulty in breathing." ;
+    med:synonym "acute pneumonia" ;
+    med:meshRef "D011014" .
+
+### DO-enriched annotations for resp:Bronchitis
+resp:Bronchitis
+    med:doid "DOID:6132" ;
+    rdfs:comment "A bronchial disease that is an inflammation of the bronchial tubes. It is caused by bacteria and viruses. The disease has_symptom cough with mucus, has_symptom shortness of breath, has_symptom low fever and has_symptom chest tightness." ;
+    med:synonym "acute Bronchitis" ;
+    med:synonym "chest cold" ;
+    med:synonym "Chest infection" ;
+    med:synonym "chronic bronchitis" ;
+    med:icd10Ref "J20" ;
+    med:icd10Ref "J40" ;
+    med:icd10Ref "J42" ;
+    med:meshRef "D001991" ;
+    med:meshRef "D029481" .
+
+### DO-enriched annotations for gi:Gastroenteritis
+gi:Gastroenteritis
+    med:doid "DOID:2326" ;
+    rdfs:comment "A gastrointestinal system infectious disease that involves inflammation of the lining of the stomach and small and large intestines, which is caused by viruses, bacteria, or parasites. Chemicals and drugs also cause gastroenteritis. The symptoms include diarrhea, loss of appetite, nausea, vomiting, cramps, and discomfort in the abdomen." ;
+    med:synonym "cholera morbus" ;
+    med:synonym "infectious colitis, enteritis and gastroenteritis" ;
+    med:icd10Ref "K52.9" ;
+    med:meshRef "D005759" .
+
+### DO-enriched annotations for neuro:Migraine
+neuro:Migraine
+    med:doid "DOID:6364" ;
+    rdfs:comment "A brain disease that is characterized by moderate to severe headaches, nausea, extreme sensitivity to light and sound and intense unilaterial throbbing or pulsing." ;
+    med:synonym "migraine disorder" ;
+    med:synonym "migraine variant" ;
+    med:synonym "migraine with or without aura" ;
+    med:icd10Ref "G43" ;
+    med:meshRef "D008881" .
+
+### DO-enriched annotations for cardio:Hypertension
+cardio:Hypertension
+    med:doid "DOID:10763" ;
+    rdfs:comment "An artery disease characterized by chronic elevated blood pressure in the arteries." ;
+    med:synonym "HTN" ;
+    med:synonym "hyperpiesia" ;
+    med:synonym "vascular hypertensive disorder" ;
+    med:icd10Ref "I10" ;
+    med:meshRef "D006973" .

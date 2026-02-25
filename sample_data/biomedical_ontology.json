@@ -1,0 +1,112 @@
+{
+  "name": "Biomedical Ontology Sample",
+  "description": "Simple biomedical domain ontology with diseases, symptoms, and treatments",
+  "version": "1.0",
+  "classes": [
+    {
+      "id": "Disease",
+      "label": "Disease",
+      "description": "A medical condition",
+      "parent_classes": ["owl:Thing"]
+    },
+    {
+      "id": "Symptom",
+      "label": "Symptom",
+      "description": "Observable manifestation of disease",
+      "parent_classes": ["owl:Thing"]
+    },
+    {
+      "id": "Treatment",
+      "label": "Treatment",
+      "description": "Medical intervention",
+      "parent_classes": ["owl:Thing"]
+    },
+    {
+      "id": "Medication",
+      "label": "Medication",
+      "description": "Drug-based treatment",
+      "parent_classes": ["Treatment"]
+    },
+    {
+      "id": "Procedure",
+      "label": "Procedure",
+      "description": "Medical procedure",
+      "parent_classes": ["Treatment"]
+    }
+  ],
+  "properties": [
+    {
+      "id": "hasSymptom",
+      "label": "has symptom",
+      "property_type": "OBJECT",
+      "domain": ["Disease"],
+      "range": ["Symptom"]
+    },
+    {
+      "id": "treatedBy",
+      "label": "treated by",
+      "property_type": "OBJECT",
+      "domain": ["Disease"],
+      "range": ["Treatment"]
+    },
+    {
+      "id": "severity",
+      "label": "severity",
+      "property_type": "DATA",
+      "domain": ["Disease"],
+      "range": ["string"]
+    }
+  ],
+  "instances": [
+    {
+      "id": "flu",
+      "label": "Influenza",
+      "class_id": "Disease",
+      "properties": {
+        "hasName": "Influenza",
+        "severity": "moderate"
+      }
+    },
+    {
+      "id": "fever",
+      "label": "Fever",
+      "class_id": "Symptom",
+      "properties": {
+        "hasName": "Fever"
+      }
+    },
+    {
+      "id": "cough",
+      "label": "Cough",
+      "class_id": "Symptom",
+      "properties": {
+        "hasName": "Cough"
+      }
+    },
+    {
+      "id": "antiviral",
+      "label": "Antiviral Medication",
+      "class_id": "Medication",
+      "properties": {
+        "hasName": "Antiviral"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "from": "flu",
+      "to": "fever",
+      "property": "hasSymptom"
+    },
+    {
+      "from": "flu",
+      "to": "cough",
+      "property": "hasSymptom"
+    },
+    {
+      "from": "flu",
+      "to": "antiviral",
+      "property": "treatedBy"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+2026-02-16 13:51:16,116 - __main__ - INFO - Starting Ontology Editor API server...
+2026-02-16 13:51:16,117 - __main__ - INFO - Server running at http://localhost:5002
+ * Serving Flask app 'ontology_api'
+ * Debug mode: on
+2026-02-16 13:51:16,228 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5002
+ * Running on http://10.0.0.246:5002
+2026-02-16 13:51:16,228 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2026-02-16 13:51:16,230 - werkzeug - INFO -  * Restarting with stat
+2026-02-16 13:51:16,587 - __main__ - INFO - Starting Ontology Editor API server...
+2026-02-16 13:51:16,588 - __main__ - INFO - Server running at http://localhost:5002
+2026-02-16 13:51:16,625 - werkzeug - WARNING -  * Debugger is active!
+2026-02-16 13:51:16,638 - werkzeug - INFO -  * Debugger PIN: 975-387-312
+/Users/gp/claude-code/startup-one/WALLY-CLEAN/ontology_api.py:62: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  "timestamp": datetime.utcnow().isoformat()
+2026-02-16 13:51:20,437 - werkzeug - INFO - 127.0.0.1 - - [16/Feb/2026 13:51:20] "GET /api/ontology/health HTTP/1.1" 200 -
+2026-02-16 13:51:26,344 - werkzeug - INFO - 127.0.0.1 - - [16/Feb/2026 13:51:26] "GET /api/ontology/health HTTP/1.1" 200 -
+2026-02-16 13:51:35,745 - __main__ - INFO - Initializing ontology service...
+2026-02-16 13:51:35,747 - __main__ - INFO - Ontology service initialized successfully
+2026-02-16 13:51:35,749 - werkzeug - INFO - 127.0.0.1 - - [16/Feb/2026 13:51:35] "GET /api/ontology/statistics HTTP/1.1" 200 -
+2026-02-16 13:51:59,795 - werkzeug - INFO -  * Detected change in '/Users/gp/claude-code/startup-one/WALLY-CLEAN/ontology_api.py', reloading
+2026-02-16 13:51:59,914 - werkzeug - INFO -  * Restarting with stat
+2026-02-16 13:52:00,837 - __main__ - INFO - Starting Ontology Editor API server...
+2026-02-16 13:52:00,838 - __main__ - INFO - Server running at http://localhost:5002
+2026-02-16 13:52:00,894 - werkzeug - WARNING -  * Debugger is active!
+2026-02-16 13:52:00,906 - werkzeug - INFO -  * Debugger PIN: 975-387-312

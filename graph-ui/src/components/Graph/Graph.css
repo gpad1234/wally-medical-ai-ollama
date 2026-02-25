@@ -1,0 +1,33 @@
+.graph-container {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.graph-canvas {
+  width: 100%;
+  height: 100%;
+  background: white;
+}
+
+.node {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.node:hover {
+  filter: brightness(1.2);
+  r: 30;
+}
+
+.node.selected {
+  stroke: #ff6b6b;
+  stroke-width: 3;
+}
+
+.link {
+  pointer-events: none;
+}
