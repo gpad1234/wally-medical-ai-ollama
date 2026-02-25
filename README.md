@@ -43,33 +43,42 @@ Both systems are **$0 cost** — no paid AI APIs, fully open-source, deployed on
 ### Prerequisites
 - Python 3.12+
 - Node.js 18+ / npm 10+
+- GCC (for C library build)
+- [Ollama](https://ollama.com) installed with `llama3.2:3b` pulled
 
-### 1. Start the Flask Ontology API
+### 1. Create the virtual environment & build C library
 
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
-python3 ontology_api.py
+
+# Build native hash-table library (one-time)
+cd src/core && make && cd ../..
+```
+
+### 2. Start Ollama
+
+```bash
+ollama pull llama3.2:3b   # first time only (~2 GB)
+./scripts/start_llm.sh    # or: ollama serve
+```
+
+### 3. Start the Flask Ontology API
+
+```bash
+source .venv/bin/activate
+PYTHONPATH=$(pwd) python graph/ontology_api.py
 # Running on http://localhost:5002
 ```
 
-### 2. Start the React Frontend
+### 4. Start the React Frontend
 
 ```bash
 cd graph-ui
 npm install      # first time only
 npm run dev
 # Running on http://localhost:5173
-```
-
-### 3. (Optional) Start the LLM Service locally
-
-Requires Ollama installed and `llama3.2:1b` pulled:
-
-```bash
-ollama pull llama3.2:1b
-cd ubuntu-deploy && npm install
-node llm-service.js
-# Running on http://localhost:3001
 ```
 
 ---
@@ -95,12 +104,13 @@ node llm-service.js
 - **Confidence Scoring** — Percentage-based match with reasoning path explanation
 - **Treatment Recommendations** — Suggested treatments per diagnosis
 
-### 🤖 LLM Integration (Ollama + Llama 3.2)
+### 🤖 LLM Integration (Ollama + Llama 3.2) — Sprint 1 ✅
 
-- **Model**: `llama3.2:1b` — 1.3 GB, runs on 1–2 GB RAM with swap
-- **Task**: Natural language symptom extraction
+- **Model**: `llama3.2:3b` — ~2 GB, runs locally via Ollama
+- **New button**: **🦙 Ask AI (Ollama)** alongside the existing JS reasoner — side-by-side comparison
+- **Endpoint**: `POST /api/diagnose` — builds an ontology-grounded prompt, calls `ollama.chat()`, returns `{ diagnosis, reasoning, model_used }`
 - **Cost**: $0 — open-source, self-hosted, no API keys
-- **Privacy**: All data stays on your server
+- **Privacy**: All inference runs on your machine
 
 ---
 
@@ -135,8 +145,8 @@ All four services run as systemd units (auto-restart on failure).
 | Backend API | Flask + Python | 3.x / 3.12 |
 | Ontology | rdflib | 7.6.0 |
 | LLM Runtime | Ollama | latest |
-| LLM Model | Llama 3.2 | 1b (1.3 GB) |
-| LLM Proxy | Node.js + Express | 18 / 4.x |
+| LLM Model | Llama 3.2 | 3b (~2 GB) |
+| C Core | libsimpledb (hash table) | gcc / ctypes |
 | Reverse Proxy | nginx | 1.24 |
 | SSL | Self-signed cert | 365-day |
 | Process Mgmt | systemd | — |
@@ -147,23 +157,24 @@ All four services run as systemd units (auto-restart on failure).
 ## 📁 Key Files
 
 ```
-WALLY-CLEAN/
-├── ontology_api.py                         # Flask REST API (port 5002)
-├── requirements.txt                        # Python dependencies
+wally-medical-ai-ollama/
+├── graph/
+│   └── ontology_api.py                     # Flask REST API (port 5002)
+│                                           #  └─ POST /api/diagnose  ← Sprint 1
 ├── graph-ui/
-│   ├── src/
-│   │   ├── App.jsx                         # Main router + tab navigation
-│   │   └── components/Ontology/
-│   │       ├── MedicalDiagnosisAI.jsx      # Medical AI Reasoner component
-│   │       ├── MedicalDiagnosisAI.css      # NLP mode styles
-│   │       └── OntologyEditor.jsx          # Fish-eye graph editor
-│   └── .env.local                          # VITE_LLM_SERVICE_URL config
-├── ubuntu-deploy/
-│   ├── llm-service.js                      # Node.js Ollama proxy (port 3001)
-│   └── deploy.sh                           # Automated deploy script
-├── MEDICAL_AI_TECH_SPEC.md                 # Algorithmic reasoning spec (827 lines)
-├── MEDICAL_AI_LLM_INTEGRATION.md          # LLM integration design (860 lines)
-└── DEPLOYMENT_GUIDE.md                    # Full deployment reference
+│   └── src/components/Ontology/
+│       ├── MedicalDiagnosisAI.jsx          # Medical Reasoner (JS + 🦙 Ask AI button)
+│       └── MedicalDiagnosisAI.css          # Styles incl. Ollama result panel
+├── src/
+│   ├── core/
+│   │   ├── simple_db.c / .h               # Hash-table C library
+│   │   ├── Makefile                        # → build/lib/libsimpledb.so
+│   │   └── build/lib/libsimpledb.so        # (generated, not committed)
+│   ├── adapters/simple_db.py              # ctypes Python wrapper
+│   └── services/                          # Business logic
+├── sample_data/medical_ontology.ttl        # 7 diseases · 20 symptoms · 14 treatments
+├── requirements.txt                        # incl. ollama>=0.6.0
+└── docs/TODO.md                            # Sprint tracker
 ```
 
 ---
@@ -175,25 +186,17 @@ WALLY-CLEAN/
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/ontology/health` | Service health |
-| GET | `/api/ontology/nodes` | List all nodes |
-| GET | `/api/ontology/viewport` | BFS viewport fetch |
-| POST | `/api/ontology/nodes` | Create node |
-| DELETE | `/api/ontology/nodes/{id}` | Delete node |
-
-### LLM Service (`/llm/`)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/llm/health` | Service + model status |
-| POST | `/llm/extract-symptoms` | NLP text → symptom array |
-| GET | `/llm/test` | Model smoke-test |
+| GET | `/api/ontology/medical` | Medical knowledge graph (diseases/symptoms/treatments) |
+| GET | `/api/ontology/classes` | List all ontology classes |
+| POST | `/api/ontology/classes` | Create class |
+| **POST** | **`/api/diagnose`** | **🦙 Ollama LLM diagnosis — Sprint 1** |
 
 ```bash
-# Example: extract symptoms from free text
-curl -sk -X POST https://161.35.239.151/llm/extract-symptoms \
+# Example: LLM diagnosis via /api/diagnose
+curl -X POST http://localhost:5002/api/diagnose \
   -H "Content-Type: application/json" \
-  -d '{"text": "I have a fever, headache and feel very tired"}'
-# {"symptoms": ["fever", "headache", "fatigue"], "model": "llama3.2:1b"}
+  -d '{"symptoms": ["Fever", "Cough", "Fatigue"]}'
+# {"data": {"diagnosis": "...", "reasoning": "...", "model_used": "llama3.2:3b"}}
 ```
 
 ---
@@ -244,8 +247,8 @@ MIT — see [LICENSE](LICENSE)
 
 ---
 
-**Last Updated**: February 2026
-**Stack**: React 18 · Flask · Ollama Llama 3.2 · nginx HTTPS · DigitalOcean Ubuntu 24.04
+**Last Updated**: February 25, 2026 · Sprint 1 complete
+**Stack**: React 18 · Flask · Ollama Llama 3.2:3b · Python venv · C libsimpledb · rdflib
 
 ## Reference:
 https://disease-ontology.org/

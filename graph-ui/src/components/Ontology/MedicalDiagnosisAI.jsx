@@ -149,6 +149,11 @@ const MedicalDiagnosisAI = () => {
   const [reasoning, setReasoning] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
 
+  // Ollama LLM state (Sprint 1)
+  const [aiResult, setAiResult] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState(null);
+
   const allSymptoms = Object.entries(medicalOntology.symptoms).map(([id, data]) => ({
     id,
     label: data.label
@@ -286,10 +291,44 @@ const MedicalDiagnosisAI = () => {
     return chain.reverse();
   };
 
+  const askAI = async () => {
+    if (selectedSymptoms.length === 0) {
+      alert('Please select at least one symptom');
+      return;
+    }
+    setAiLoading(true);
+    setAiResult(null);
+    setAiError(null);
+
+    // Convert symptom IDs to human-readable labels for the LLM
+    const symptomLabels = selectedSymptoms.map(
+      id => medicalOntology.symptoms[id]?.label || id
+    );
+
+    try {
+      const res = await fetch('/api/diagnose', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ symptoms: symptomLabels }),
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) {
+        throw new Error(json.error || `HTTP ${res.status}`);
+      }
+      setAiResult(json.data);
+    } catch (err) {
+      setAiError(err.message);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   const reset = () => {
     setSelectedSymptoms([]);
     setDiagnosis(null);
     setReasoning(null);
+    setAiResult(null);
+    setAiError(null);
   };
 
   return (
@@ -345,9 +384,53 @@ const MedicalDiagnosisAI = () => {
               >
                 {analyzing ? '🤖 Analyzing...' : '🔍 Analyze Symptoms'}
               </button>
+              <button
+                className="btn-ask-ai"
+                onClick={askAI}
+                disabled={selectedSymptoms.length === 0 || aiLoading}
+              >
+                {aiLoading ? '⏳ Asking Ollama...' : '🦙 Ask AI (Ollama)'}
+              </button>
             </div>
           </div>
         </div>
+
+        {/* Ollama LLM Response Panel (Sprint 1) */}
+        {aiLoading && (
+          <div className="reasoning-process">
+            <div className="ai-thinking">
+              <div className="spinner"></div>
+              <p>Asking Ollama llama3.2:3b… this may take a moment.</p>
+            </div>
+          </div>
+        )}
+
+        {aiError && (
+          <div className="ai-error-panel">
+            <h2>⚠️ Ollama Error</h2>
+            <p>{aiError}</p>
+            <p className="ai-error-hint">Make sure Ollama is running: <code>./start_llm.sh</code> and <code>ollama list</code> shows <code>llama3.2:3b</code>.</p>
+          </div>
+        )}
+
+        {aiResult && (
+          <div className="ai-result-panel">
+            <div className="ai-result-header">
+              <h2>🦙 Ollama Diagnosis</h2>
+              <span className="ai-model-badge">{aiResult.model_used}</span>
+            </div>
+            <div className="ai-symptoms-line">
+              Symptoms: {aiResult.symptoms_received?.join(', ')}
+            </div>
+            <div className="ai-result-body">
+              {aiResult.diagnosis.split('\n').map((line, i) => (
+                line.trim() ? <p key={i}>{line}</p> : <br key={i} />
+              ))}
+            </div>
+            <div className="ai-reasoning-note">ℹ️ {aiResult.reasoning}</div>
+            <div className="ai-disclaimer">⚠️ Educational only — not for real medical decisions.</div>
+          </div>
+        )}
 
         {/* AI Reasoning Process */}
         {analyzing && (

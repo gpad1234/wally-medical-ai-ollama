@@ -7,20 +7,20 @@
 
 ## Next Session: Wire Ollama (Sprint 1)
 
-- [ ] **1. Install Ollama Python package**
+- [x] **1. Install Ollama Python package**
   ```bash
   source .venv/bin/activate
   pip install ollama
   # add to requirements.txt
   ```
 
-- [ ] **2. Add `POST /api/diagnose` route to `ontology_api.py`**
+- [x] **2. Add `POST /api/diagnose` route to `ontology_api.py`**
   - Receive `{ symptoms: ["Fever", "Cough", ...] }` from frontend
   - Build a plain prompt using the ontology data already loaded in memory
   - Call `ollama.chat(model="llama3.2:3b", messages=[...])`
   - Return `{ diagnosis, reasoning, model_used }` JSON
 
-- [ ] **3. Update `MedicalDiagnosisAI.jsx`**
+- [x] **3. Update `MedicalDiagnosisAI.jsx`**
   - Add **"Ask AI"** button next to existing "Analyze Symptoms"
   - `POST /api/diagnose` with selected symptoms on click
   - Show LLM response in a new panel (keep existing JS reasoner for side-by-side comparison)

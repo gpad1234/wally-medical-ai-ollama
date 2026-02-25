@@ -900,6 +900,111 @@ def import_ontology():
 
 
 # ============================================================================
+# Medical AI — Ollama LLM Diagnosis (Sprint 1)
+# ============================================================================
+
+@app.route('/api/diagnose', methods=['POST'])
+def diagnose():
+    """
+    POST /api/diagnose
+    Body: { "symptoms": ["Fever", "Cough", ...] }
+    Returns: { diagnosis, reasoning, model_used }
+
+    Builds a concise prompt from the medical ontology (diseases + symptoms)
+    and forwards it to the local Ollama llama3.2:3b model.
+    """
+    import ollama
+    import os
+    from rdflib import Graph as RDFGraph, Namespace, RDF, RDFS
+
+    data = request.get_json(silent=True) or {}
+    symptoms = data.get('symptoms', [])
+
+    if not symptoms:
+        return error_response('No symptoms provided. Send {"symptoms": ["Fever","Cough"]}', 400)
+
+    # ---- Load the medical ontology for context ---------------------------
+    TTL_PATH = os.path.join(os.path.dirname(__file__), 'sample_data', 'medical_ontology.ttl')
+    disease_context = ""
+    if os.path.exists(TTL_PATH):
+        try:
+            g = RDFGraph()
+            g.parse(TTL_PATH, format='turtle')
+            MED = Namespace('http://wally.io/medical#')
+
+            lines = []
+            for s in g.subjects(RDF.type, MED.Disease):
+                disease_id = next(g.objects(s, MED.id), None)
+                label = next(g.objects(s, RDFS.label), None)
+                severity = next(g.objects(s, MED.severity), None)
+                sym_labels = []
+                for sym_node in g.objects(s, MED.hasSymptom):
+                    sym_label = next(g.objects(sym_node, RDFS.label), None)
+                    if sym_label:
+                        sym_labels.append(str(sym_label))
+                if label:
+                    lines.append(
+                        f"- {label} (severity: {severity or 'unknown'}): symptoms include {', '.join(sym_labels)}"
+                    )
+            disease_context = "\n".join(lines)
+        except Exception as e:
+            logger.warning(f"Could not load TTL for diagnose prompt: {e}")
+
+    if not disease_context:
+        disease_context = (
+            "- Common Cold (mild): Runny Nose, Sore Throat, Cough, Sneezing, Fatigue\n"
+            "- Influenza (moderate): Fever, Cough, Fatigue, Body Aches, Headache, Sore Throat\n"
+            "- Pneumonia (severe): Fever, Cough, Chest Pain, Shortness of Breath, Fatigue\n"
+            "- Bronchitis (moderate): Cough, Mucus, Chest Discomfort, Fatigue\n"
+            "- Gastroenteritis (moderate): Nausea, Vomiting, Diarrhea, Abdominal Pain, Fever\n"
+            "- Migraine (moderate): Severe Headache, Nausea, Light Sensitivity, Sound Sensitivity\n"
+            "- Hypertension (moderate): Headache, Dizziness, Chest Pain"
+        )
+
+    symptom_list = ", ".join(symptoms)
+    system_prompt = (
+        "You are a medical AI assistant using an ontology-based knowledge graph. "
+        "Your role is educational — never replace real medical advice. "
+        "Given the patient symptoms and the knowledge base of diseases, "
+        "reason step by step to suggest the most likely conditions, explain why, "
+        "and note recommended next steps. Be concise."
+    )
+    user_prompt = (
+        f"Knowledge base (diseases and their typical symptoms):\n{disease_context}\n\n"
+        f"Patient symptoms: {symptom_list}\n\n"
+        "Please provide:\n"
+        "1. Most likely diagnosis (and confidence reasoning)\n"
+        "2. Brief reasoning trace using the ontology relationships\n"
+        "3. Recommended next steps"
+    )
+
+    # ---- Call Ollama -------------------------------------------------------
+    try:
+        response = ollama.chat(
+            model='llama3.2:3b',
+            messages=[
+                {'role': 'system', 'content': system_prompt},
+                {'role': 'user',   'content': user_prompt},
+            ]
+        )
+        llm_text = response['message']['content']
+        model_used = response.get('model', 'llama3.2:3b')
+    except Exception as e:
+        logger.error(f"Ollama error: {e}", exc_info=True)
+        return error_response(
+            f"Ollama unavailable: {str(e)}. Make sure ollama is running and llama3.2:3b is pulled.",
+            503
+        )
+
+    return jsonify(success_response({
+        'diagnosis': llm_text,
+        'reasoning': f'LLM-based reasoning over medical ontology ({len(symptoms)} symptoms analyzed)',
+        'model_used': model_used,
+        'symptoms_received': symptoms,
+    }, 'LLM diagnosis complete'))
+
+
+# ============================================================================
 # Graph Pagination Endpoints
 # ============================================================================
 

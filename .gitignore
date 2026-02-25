@@ -220,8 +220,8 @@ Thumbs.db
 *.a
 *.lib
 
-# Core dumps
-core
+# Core dumps (root-level only, so src/core/ is not accidentally ignored)
+/core
 core.*
 
 # Temporary files
